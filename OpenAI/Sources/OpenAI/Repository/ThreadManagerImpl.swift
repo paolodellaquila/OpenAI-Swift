@@ -11,17 +11,15 @@ class OpenAIThreadManagerImpl: OpenAIThreadManager {
     private var threads: [String: ThreadContext] = [:]
     
     private let apiKey: String
-    private let apiURL: String
+    private let session: URLSessionProtocol
     
     /**
      Initializes the thread manager with an API key.
-
      - Parameter apiKey: The OpenAI API key.
-     - Parameter apiURL: The OpenAI API URL.
     */
-    init(apiKey: String, apiURL: String) {
+    init(apiKey: String, session: URLSessionProtocol = URLSession.shared) {
         self.apiKey = apiKey
-        self.apiURL = apiURL
+        self.session = session
     }
 
     func openThread() -> String {
@@ -38,7 +36,7 @@ class OpenAIThreadManagerImpl: OpenAIThreadManager {
 
         threadContext.prompts.append(prompt)
 
-        var request = URLRequest(url: URL(string: "\(apiURL)/chat/completions")!)
+        var request = URLRequest(url: URL(string: Constants.urlResolver(endpoint: .chat))!)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -56,7 +54,7 @@ class OpenAIThreadManagerImpl: OpenAIThreadManager {
             return
         }
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        let task = session.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return

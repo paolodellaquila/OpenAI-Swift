@@ -7,5 +7,11 @@
 
 class Constants {
     static let apiKey = ""
-    static let apiURL = "https://api.openai.com/v1"
+    
+    private static let apiURL = "https://api.openai.com"
+    private static let version = "v1"
+    
+    static func urlResolver(endpoint: Endpoint) -> String {
+        return "\(apiURL)/\(version)/\(endpoint.rawValue)/"
+    }
 }

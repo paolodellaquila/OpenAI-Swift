@@ -24,7 +24,7 @@ public class OpenAI {
             fatalError("API Key not found. Please set 'OPENAI_API_KEY' in your environment variables.")
         }
         self.apiKey = apiKey
-        self.threadManager = OpenAIThreadManagerImpl(apiKey: apiKey, apiURL: Constants.apiURL)
+        self.threadManager = OpenAIThreadManagerImpl(apiKey: apiKey)
     }
 
     /**
