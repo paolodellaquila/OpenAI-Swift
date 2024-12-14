@@ -5,6 +5,9 @@
 //  Created by Francesco Paolo Dellaquila on 14/12/24.
 //
 
+/**
+ A private class to manage thread-specific data.
+ */
 class ThreadContext {
     let id: String
     var prompts: [String]

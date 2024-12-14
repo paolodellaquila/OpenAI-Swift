@@ -13,6 +13,12 @@ class OpenAIThreadManagerImpl: OpenAIThreadManager {
     private let apiKey: String
     private let apiURL: String
     
+    /**
+     Initializes the thread manager with an API key.
+
+     - Parameter apiKey: The OpenAI API key.
+     - Parameter apiURL: The OpenAI API URL.
+    */
     init(apiKey: String, apiURL: String) {
         self.apiKey = apiKey
         self.apiURL = apiURL
