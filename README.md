@@ -1,2 +1,2 @@
 # OpenAI-Swift
-A Swift Package Manager that works with Open AI Apis
+A Standalone Swift Package that works with Open AI Apis
