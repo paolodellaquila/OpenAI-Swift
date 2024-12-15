@@ -7,14 +7,14 @@
 
 
 public struct AIMessage {
-    let id, object: String
-    let createdAt: Int
-    let assistantID: String?
-    let threadID: String
-    let runID: String?
-    let role: String
-    let content: [AIContent]
-    let attachments: [AIAttachment]
+   public let id, object: String
+   public let createdAt: Int
+   public let assistantID: String?
+   public let threadID: String
+   public let runID: String?
+   public let role: String
+   public let content: [AIContent]
+   public let attachments: [AIAttachment]
     
     static func fromMessageResponse(_ response: MessageResponse) -> AIMessage {
         AIMessage.init(id: response.id, object: response.object, createdAt: response.createdAt, assistantID: response.assistantID, threadID: response.threadID, runID: response.runID, role: response.role, content: AIContent.fromContentResponse(response.content), attachments: AIAttachment.fromAttachamentResponse(response.attachments))
@@ -26,8 +26,8 @@ public struct AIMessage {
 }
 
 public struct AIContent {
-    let type: String
-    let text: AIText
+    public let type: String
+    public let text: AIText
     
     static func fromContentResponse(_ response: [ContentResponse]) -> [AIContent] {
         response.map { AIContent(type: $0.type, text: AIText(value: $0.text.value)) }
@@ -35,7 +35,7 @@ public struct AIContent {
 }
 
 public struct AIText {
-    let value: String
+    public let value: String
     
     static func fromTextResponse(_ response: TextResponse) -> AIText {
         AIText(value: response.value)
@@ -43,7 +43,7 @@ public struct AIText {
 }
 
 public struct AIAttachment {
-    let fileID: String
+    public let fileID: String
     
     static func fromAttachamentResponse(_ response: [AttachmentResponse]) -> [AIAttachment] {
         response.map { AIAttachment(fileID: $0.fileID) }

@@ -27,36 +27,23 @@ public class OpenAI {
         self.aiService = OpenAIServiceImpl(apiKey: apiKey)
     }
 
-    /**
-     Opens a new thread for sending requests.
-
-     - Returns: A unique thread ID for the new thread.
-    */
+    //MARK: -- Threads
     public func openThread() async throws-> AIThread {
         return try await aiService.openThread()
     }
-
-    /**
-     Sends a request to the OpenAI API in the context of a specific thread.
-
-     - Parameters:
-       - threadId: The unique thread ID.
-       - prompt: The prompt text to send to OpenAI.
-       - images: An array of image data to include in the request.
-       - completion: A closure called with the result of the request.
-    */
-    public func sendRequest(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage {
-        return try await aiService.createMessage(threadId: threadId, prompt: prompt, images: images)
-    }
-
-    /**
-     Closes a thread and removes its context.
-
-     - Parameter threadId: The unique thread ID to close.
-    */
     public func deleteThread(threadId: String) async throws -> Bool {
         return try await aiService.deleteThread(threadId: threadId)
     }
+
+    //MARK: -- Message
+    public func listMessages(threadId: String) async throws -> [AIMessage] {
+        return try await aiService.listMessages(threadId: threadId)
+    }
+    public func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage {
+        return try await aiService.createMessage(threadId: threadId, prompt: prompt, images: images)
+    }
+
+
 }
 
 

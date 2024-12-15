@@ -9,8 +9,9 @@ import Foundation
 import OpenAI
 
 class ContentViewModel: ObservableObject {
-    @Published var thread: Thread?
+    @Published var thread: AIThread?
     @Published var prompt: String = ""
+    
     @Published var responses: [String] = []
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
@@ -18,30 +19,28 @@ class ContentViewModel: ObservableObject {
     private let openAI = OpenAI()
     
     func openThread() {
-        thread = await openAI.openThread()
+        Task.detached { [weak self] in
+            self?.thread = try? await self?.openAI.openThread()
+        }
     }
     
-    func sendRequest() {
-        guard let threadId = threadId, !prompt.isEmpty else {
-            errorMessage = "Thread ID or prompt is missing"
+    func createMessage() {
+        guard let thread = thread, !prompt.isEmpty else {
+            errorMessage = "Thread or prompt is missing"
             showError = true
             return
         }
         
-        openAI.sendRequest(threadId: threadId, prompt: prompt, images: []) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let response):
-                    if let message = response["response"] as? String {
-                        self.responses.append(message)
-                    } else {
-                        self.responses.append("Invalid response format")
-                    }
-                case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                    self.showError = true
-                }
+        Task.detached { [weak self] in
+            do{
+                _ = try await self?.openAI.createMessage(threadId: thread.id, prompt: self?.prompt ?? "", images: [])
+                //TODO
+            } catch {
+                self?.errorMessage = error.localizedDescription
+                self?.showError = true
+                return
             }
         }
+        
     }
 }

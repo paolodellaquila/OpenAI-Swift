@@ -37,12 +37,12 @@ class OpenAIServiceImpl: OpenAIService {
     }
 
     //MARK: -- Threads
-    func openThread() async throws -> AIThread {
+    public func openThread() async throws -> AIThread {
         let request = try APIConstants.thread.request(apiKey: apiKey, organizationID: nil, method: .post)
         let response = try await self.networkService.fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
         return AIThread.fromThreadResponse(response)
     }
-    func deleteThread(threadId: String) async throws -> Bool {
+    public func deleteThread(threadId: String) async throws -> Bool {
         let request = try APIConstants.thread.request(apiKey: apiKey, organizationID: nil, method: .delete, queryItems: [URLQueryItem(name: "thread_id", value: threadId)])
         let response = try await self.networkService.fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
         return response.deleted ?? false
@@ -50,12 +50,12 @@ class OpenAIServiceImpl: OpenAIService {
     
 
     //MARK: -- Messages
-    func listMessages(threadId: String) async throws -> [AIMessage] {
+    public func listMessages(threadId: String) async throws -> [AIMessage] {
         let request = try APIConstants.message(threadId: threadId).request(apiKey: apiKey, organizationID: nil, method: .get)
         let response = try await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
         return AIMessage.fromMessageResponse(response)
     }
-    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage {
+    public func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage {
         let request = try APIConstants.message(threadId: threadId).request(apiKey: apiKey, organizationID: nil, method: .post)
         let response = try await self.networkService.fetch(debugEnabled: true, type: MessageResponse.self, with: request)
         return AIMessage.fromMessageResponse(response)

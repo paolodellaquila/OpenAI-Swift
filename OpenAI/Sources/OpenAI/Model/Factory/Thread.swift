@@ -6,8 +6,8 @@
 //
 
 public struct AIThread {
-    let id, object: String
-    let createdAt: Int
+    public let id, object: String
+    public let createdAt: Int
 
     enum CodingKeys: String, CodingKey {
         case id, object

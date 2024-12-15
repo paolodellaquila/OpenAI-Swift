@@ -23,7 +23,7 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 
-                if let threadId = viewModel.threadId {
+                if let threadId = viewModel.thread?.id {
                     Text("Current Thread ID: \(threadId)")
                         .font(.subheadline)
                         .foregroundColor(.gray)
@@ -35,7 +35,7 @@ struct ContentView: View {
                     .padding()
                 
                 Button("Send Request") {
-                    viewModel.sendRequest()
+                    viewModel.createMessage()
                 }
                 .buttonStyle(.bordered)
                 
