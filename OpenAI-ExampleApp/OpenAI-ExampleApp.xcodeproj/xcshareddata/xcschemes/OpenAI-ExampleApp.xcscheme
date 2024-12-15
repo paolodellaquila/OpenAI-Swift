@@ -74,13 +74,6 @@
             ReferencedContainer = "container:OpenAI-ExampleApp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "OPENAI_API_KEY"
-            value = "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"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
