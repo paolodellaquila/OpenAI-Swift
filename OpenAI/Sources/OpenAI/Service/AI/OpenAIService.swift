@@ -22,7 +22,7 @@ protocol OpenAIService {
      https://platform.openai.com/docs/api-reference/threads/createThread
      - Returns: A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
     */
-    func openThread() async throws -> Thread
+    func openThread() async throws -> AIThread
     
     /**
      Delete a thread.
@@ -46,7 +46,7 @@ protocol OpenAIService {
        - threadId: The unique thread ID.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func listMessages(threadId: String) async throws -> [Message]
+    func listMessages(threadId: String) async throws -> [AIMessage]
     
     /**
      Sends a request to the OpenAI API within a specific thread and create a new attached message
@@ -58,7 +58,7 @@ protocol OpenAIService {
        - images: An array of image data (base64 encoded) to include.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> Message
+    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage
     
 
 }

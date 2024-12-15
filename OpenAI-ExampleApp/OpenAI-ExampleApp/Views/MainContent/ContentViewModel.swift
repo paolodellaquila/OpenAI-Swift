@@ -9,7 +9,7 @@ import Foundation
 import OpenAI
 
 class ContentViewModel: ObservableObject {
-    @Published var threadId: String?
+    @Published var thread: Thread?
     @Published var prompt: String = ""
     @Published var responses: [String] = []
     @Published var showError: Bool = false
@@ -18,7 +18,7 @@ class ContentViewModel: ObservableObject {
     private let openAI = OpenAI()
     
     func openThread() {
-        threadId = openAI.openThread()
+        thread = await openAI.openThread()
     }
     
     func sendRequest() {

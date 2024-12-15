@@ -5,7 +5,7 @@
 //  Created by Francesco Paolo Dellaquila on 15/12/24.
 //
 
-public struct Thread {
+public struct AIThread {
     let id, object: String
     let createdAt: Int
 
@@ -14,7 +14,7 @@ public struct Thread {
         case createdAt = "created_at"
     }
     
-    static func fromThreadResponse(_ response: ThreadResponse) -> Thread {
-        Thread(id: response.id, object: response.object, createdAt: response.createdAt)
+    static func fromThreadResponse(_ response: ThreadResponse) -> AIThread {
+        AIThread(id: response.id, object: response.object, createdAt: response.createdAt)
     }
 }

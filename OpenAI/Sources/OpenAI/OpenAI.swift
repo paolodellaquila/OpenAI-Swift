@@ -32,7 +32,7 @@ public class OpenAI {
 
      - Returns: A unique thread ID for the new thread.
     */
-    public func openThread() async throws-> Thread {
+    public func openThread() async throws-> AIThread {
         return try await aiService.openThread()
     }
 
@@ -45,7 +45,7 @@ public class OpenAI {
        - images: An array of image data to include in the request.
        - completion: A closure called with the result of the request.
     */
-    public func sendRequest(threadId: String, prompt: String, images: [Data]) async throws -> Message {
+    public func sendRequest(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage {
         return try await aiService.createMessage(threadId: threadId, prompt: prompt, images: images)
     }
 
