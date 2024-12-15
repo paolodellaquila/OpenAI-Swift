@@ -11,7 +11,7 @@ import Foundation
 /**
  Manages individual threads for OpenAI requests.
  */
-protocol OpenAIThreadManager {
+protocol OpenAIService {
     
     /**
      Opens a new thread and returns a unique thread ID.
@@ -28,7 +28,7 @@ protocol OpenAIThreadManager {
        - images: An array of image data (base64 encoded) to include.
        - completion: A closure that handles the API response or error.
     */
-    func sendRequest(threadId: String, prompt: String, images: [Data], completion: @escaping @Sendable (Result<[String: Any], Error>) -> Void)
+    func startChat(threadId: String, prompt: String, images: [Data], completion: @escaping @Sendable (Result<[String: Any], Error>) -> Void)
     
     /**
      Closes a thread by removing its context.

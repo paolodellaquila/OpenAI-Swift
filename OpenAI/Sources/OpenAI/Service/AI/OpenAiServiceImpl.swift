@@ -7,28 +7,44 @@
 
 import Foundation
 
-class OpenAIThreadManagerImpl: OpenAIThreadManager {
-    private var threads: [String: ThreadContext] = [:]
-    
-    private let apiKey: String
+class OpenAIServiceImpl: OpenAIService {
+    private let apiKey: Authorization
     private let session: URLSessionProtocol
+    
+    private let organizationID: String?
+
     
     /**
      Initializes the thread manager with an API key.
      - Parameter apiKey: The OpenAI API key.
+     - Parameter baseURL: The OpenAI Api base url
+     - Parameter session: URLSession shared client
+     - Parameter organizationID: The OpenAI API project organization id.
     */
-    init(apiKey: String, session: URLSessionProtocol = URLSession.shared) {
-        self.apiKey = apiKey
+    init(
+        apiKey: String,
+        baseURL: String,
+        session: URLSessionProtocol = URLSession.shared,
+        organizationID: String? = nil
+    ) {
+        self.apiKey = .bearer(apiKey)
+        APIConstants.overrideBaseURL = baseURL
         self.session = session
+        self.organizationID = organizationID
     }
 
-    func openThread() -> String {
-        let threadId = UUID().uuidString
-        threads[threadId] = ThreadContext(id: threadId, prompts: [])
-        return threadId
+    func openThread() async throws -> Thread {
+        let request = try APIConstants.thread.request(apiKey: apiKey, organizationID: nil, method: .post)
+        return try await fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
     }
+    
+    
+    func closeThread(threadId: String) {
+        threads.removeValue(forKey: threadId)
+    }
+    
 
-    func sendRequest(threadId: String, prompt: String, images: [Data], completion: @escaping @Sendable (Result<[String: Any], Error>) -> Void) {
+    func createMessage(threadId: String, prompt: String, images: [Data], completion: @escaping @Sendable (Result<[String: Any], Error>) -> Void) {
         guard let threadContext = threads[threadId] else {
             completion(.failure(ThreadError.threadNotFound))
             return
@@ -43,9 +59,17 @@ class OpenAIThreadManagerImpl: OpenAIThreadManager {
 
         do {
             let requestBody: [String: Any] = [
-                "thread_id": threadId,
-                "prompt": threadContext.prompts.joined(separator: "\n"),
-                "images": images.map { $0.base64EncodedString() }
+                "model": "gpt-4o",
+                "messages": [
+                    [
+                        "role": "user",
+                        "content": [
+                            ["type": "text", "text": prompt],
+                            ["type": "image_url", "image_url": ["url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg"]]
+                        ]
+                    ]
+                ],
+                "max_tokens": 300
             ]
 
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
@@ -74,9 +98,5 @@ class OpenAIThreadManagerImpl: OpenAIThreadManager {
         }
 
         task.resume()
-    }
-
-    func closeThread(threadId: String) {
-        threads.removeValue(forKey: threadId)
     }
 }
