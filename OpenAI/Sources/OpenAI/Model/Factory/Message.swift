@@ -17,7 +17,7 @@ public struct Message {
     let attachments: [Attachment]
     
     static func fromMessageResponse(_ response: MessageResponse) -> Message {
-        Message.init(id: response.id, object: response.object, createdAt: response.createdAt, assistantID: response.assistantID, threadID: response.threadID, runID: response.runID, role: response.role, content: response.content, attachments: response.attachments)
+        Message.init(id: response.id, object: response.object, createdAt: response.createdAt, assistantID: response.assistantID, threadID: response.threadID, runID: response.runID, role: response.role, content: Content.fromContentResponse(response.content), attachments: Attachment.fromAttachamentResponse(response.attachments))
     }
     
     static func fromMessageResponse(_ response: [MessageResponse]) -> [Message] {
@@ -25,16 +25,16 @@ public struct Message {
     }
 }
 
-public struct Content: Decodable {
+public struct Content {
     let type: String
     let text: Text
     
-    static func fromMessageResponse(_ response: ContentResponse) -> Content {
-        Content(type: response.type, text: response.text)
+    static func fromContentResponse(_ response: [ContentResponse]) -> [Content] {
+        response.map { Content(type: $0.type, text: Text(value: $0.text.value)) }
     }
 }
 
-public struct Text: Decodable {
+public struct Text {
     let value: String
     
     static func fromTextResponse(_ response: TextResponse) -> Text {
@@ -42,10 +42,10 @@ public struct Text: Decodable {
     }
 }
 
-public struct Attachment: Decodable {
+public struct Attachment {
     let fileID: String
     
-    static func fromAttachamentResponse(_ response: AttachmentResponse) -> Attachment {
-        Attachment(fileID: response.fileID)
+    static func fromAttachamentResponse(_ response: [AttachmentResponse]) -> [Attachment] {
+        response.map { Attachment(fileID: $0.fileID) }
     }
 }

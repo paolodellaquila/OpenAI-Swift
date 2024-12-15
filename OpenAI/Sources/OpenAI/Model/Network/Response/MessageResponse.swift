@@ -6,15 +6,15 @@
 //
 
 
-struct MessageResponse: Decodable {
+struct MessageResponse: Codable {
     let id, object: String
     let createdAt: Int
     let assistantID: String?
     let threadID: String
     let runID: String?
     let role: String
-    let content: [Content]
-    let attachments: [Attachment]
+    let content: [ContentResponse]
+    let attachments: [AttachmentResponse]
 
     enum CodingKeys: String, CodingKey {
         case id, object
@@ -26,16 +26,16 @@ struct MessageResponse: Decodable {
     }
 }
 
-struct ContentResponse: Decodable {
+struct ContentResponse: Codable {
     let type: String
-    let text: Text
+    let text: TextResponse
 }
 
-struct TextResponse: Decodable {
+struct TextResponse: Codable {
     let value: String
 }
 
-struct AttachmentResponse: Decodable {
+struct AttachmentResponse: Codable {
     let fileID: String
     
     enum CodingKeys: String, CodingKey {

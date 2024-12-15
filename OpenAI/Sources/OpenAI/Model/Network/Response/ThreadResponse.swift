@@ -6,7 +6,7 @@
 //
 
 
-struct ThreadResponse: Decodable {
+struct ThreadResponse: Codable {
     let id, object: String
     let createdAt: Int
     let deleted: Bool?

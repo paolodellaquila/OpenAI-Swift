@@ -6,15 +6,20 @@
 //
 
 import Foundation
+import OpenAI
 
-class URLSessionMock: URLSession, @unchecked Sendable {
+class URLSessionMock: URLSessionProtocol {
     var data: Data?
     var response: URLResponse?
     var error: Error?
-
-    override func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
-        return URLSessionDataTaskMock { [weak self] in
-            completionHandler(self?.data, self?.response, self?.error)
+    
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if let error = error {
+            throw error
         }
+        guard let data = data, let response = response else {
+            throw URLError(.badServerResponse)
+        }
+        return (data, response)
     }
 }
