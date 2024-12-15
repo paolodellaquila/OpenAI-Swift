@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		480FCB6F2D0E23B600B408F5 /* OpenAI in Frameworks */ = {isa = PBXBuildFile; productRef = 480FCB6E2D0E23B600B408F5 /* OpenAI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		480FCB4A2D0E21FD00B408F5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				480FCB6F2D0E23B600B408F5 /* OpenAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = "OpenAI-ExampleApp";
 			packageProductDependencies = (
+				480FCB6E2D0E23B600B408F5 /* OpenAI */,
 			);
 			productName = "OpenAI-ExampleApp";
 			productReference = 480FCB382D0E21FB00B408F5 /* OpenAI-ExampleApp.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 480FCB2F2D0E21FB00B408F5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				480FCB6D2D0E22B700B408F5 /* XCLocalSwiftPackageReference "../OpenAI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 480FCB392D0E21FB00B408F5 /* Products */;
 			projectDirPath = "";
@@ -431,7 +440,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"OpenAI-ExampleApp/Preview Content\"";
-				DEVELOPMENT_TEAM = A38N993DD8;
+				DEVELOPMENT_TEAM = 8453XVH5KR;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -591,6 +600,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		480FCB6D2D0E22B700B408F5 /* XCLocalSwiftPackageReference "../OpenAI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../OpenAI;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		480FCB6E2D0E23B600B408F5 /* OpenAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OpenAI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 480FCB302D0E21FB00B408F5 /* Project object */;
 }

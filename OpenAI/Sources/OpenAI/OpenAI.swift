@@ -11,7 +11,7 @@ import Foundation
  Main class for interacting with OpenAI services. This class acts as a high-level interface, exposing useful methods for managing threads and sending requests.
  */
 public class OpenAI {
-    private let threadManager: OpenAIThreadManager
+    private let aiService: OpenAIService
     private let apiKey: String
 
     /**
@@ -24,7 +24,7 @@ public class OpenAI {
             fatalError("API Key not found. Please set 'OPENAI_API_KEY' in your environment variables.")
         }
         self.apiKey = apiKey
-        self.threadManager = OpenAIThreadManagerImpl(apiKey: apiKey)
+        self.aiService = OpenAIServiceImpl(apiKey: apiKey)
     }
 
     /**
@@ -32,8 +32,8 @@ public class OpenAI {
 
      - Returns: A unique thread ID for the new thread.
     */
-    public func openThread() -> String {
-        return threadManager.openThread()
+    public func openThread() async throws-> Thread {
+        return try await aiService.openThread()
     }
 
     /**
@@ -45,8 +45,8 @@ public class OpenAI {
        - images: An array of image data to include in the request.
        - completion: A closure called with the result of the request.
     */
-    public func sendRequest(threadId: String, prompt: String, images: [Data], completion: @Sendable @escaping (Result<[String: Any], Error>) -> Void) {
-        threadManager.sendRequest(threadId: threadId, prompt: prompt, images: images, completion: completion)
+    public func sendRequest(threadId: String, prompt: String, images: [Data]) async throws -> Message {
+        return try await aiService.createMessage(threadId: threadId, prompt: prompt, images: images)
     }
 
     /**
@@ -54,8 +54,8 @@ public class OpenAI {
 
      - Parameter threadId: The unique thread ID to close.
     */
-    public func closeThread(threadId: String) {
-        threadManager.closeThread(threadId: threadId)
+    public func deleteThread(threadId: String) async throws -> Bool {
+        return try await aiService.deleteThread(threadId: threadId)
     }
 }
 

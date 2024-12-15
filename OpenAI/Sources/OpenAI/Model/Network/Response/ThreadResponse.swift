@@ -1,20 +1,18 @@
-class ThreadResponse {
-    String id;
-    String object;
-    int createdAt;
-    Metadata metadata;
-    Metadata toolResources;
+//
+//  ThreadResponse.swift
+//  OpenAI
+//
+//  Created by Francesco Paolo Dellaquila on 15/12/24.
+//
 
-    ThreadResponse({
-        required this.id,
-        required this.object,
-        required this.createdAt,
-        required this.metadata,
-        required this.toolResources,
-    });
 
-}
+struct ThreadResponse: Decodable {
+    let id, object: String
+    let createdAt: Int
+    let deleted: Bool?
 
-class Metadata {
-    Metadata();
+    enum CodingKeys: String, CodingKey {
+        case id, object, deleted
+        case createdAt = "created_at"
+    }
 }

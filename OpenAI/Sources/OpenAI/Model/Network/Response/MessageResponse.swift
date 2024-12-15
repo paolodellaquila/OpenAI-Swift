@@ -6,16 +6,15 @@
 //
 
 
-struct MessageResponse: Codable {
+struct MessageResponse: Decodable {
     let id, object: String
     let createdAt: Int
-    let assistantID: JSONNull?
+    let assistantID: String?
     let threadID: String
-    let runID: JSONNull?
+    let runID: String?
     let role: String
     let content: [Content]
-    let attachments: [JSONAny]
-    let metadata: Metadata
+    let attachments: [Attachment]
 
     enum CodingKeys: String, CodingKey {
         case id, object
@@ -23,6 +22,23 @@ struct MessageResponse: Codable {
         case assistantID = "assistant_id"
         case threadID = "thread_id"
         case runID = "run_id"
-        case role, content, attachments, metadata
+        case role, content, attachments
+    }
+}
+
+struct ContentResponse: Decodable {
+    let type: String
+    let text: Text
+}
+
+struct TextResponse: Decodable {
+    let value: String
+}
+
+struct AttachmentResponse: Decodable {
+    let fileID: String
+    
+    enum CodingKeys: String, CodingKey {
+        case fileID = "file_id"
     }
 }

@@ -12,7 +12,7 @@ enum APIConstants {
    nonisolated(unsafe) static var overrideBaseURL: String? = nil
    
    case thread
-   case message
+   case message(threadId: String)
 }
 
 extension APIConstants: Endpoint {
@@ -24,7 +24,7 @@ extension APIConstants: Endpoint {
    var path: String {
       switch self {
       case .thread: "/v1/threads"
-      case .message: "/v1/messages"
+      case .message(let threadId): "/v1/\(threadId)/messages"
       }
    }
 }

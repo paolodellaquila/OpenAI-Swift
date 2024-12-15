@@ -18,32 +18,47 @@ protocol OpenAIService {
     //[BETA]
     
     /**
-     Opens a new thread and returns a unique thread ID.
-     - Returns: A unique thread ID for the new thread.
+     Create a new thread.
+     https://platform.openai.com/docs/api-reference/threads/createThread
+     - Returns: A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
     */
-    func openThread() -> String
+    func openThread() async throws -> Thread
     
     /**
-     Closes a thread by removing its context.
-
+     Delete a thread.
+     https://platform.openai.com/docs/api-reference/threads/deleteThread
+     
      - Parameter threadId: The unique thread ID to close.
+     - Returns: A Boolean that indicates if thread is correctly deleted.
+     - Response:  A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
     */
-    func closeThread(threadId: String)
+    func deleteThread(threadId: String) async throws -> Bool
     
     
     //MARK: MESSAGES
     //[BETA]
     
     /**
-     Sends a request to the OpenAI API within a specific thread.
+     Sends a request to the OpenAI API within a specific thread and return a list of attached messafe
+     https://platform.openai.com/docs/api-reference/messages/listMessages
+     
+     - Parameters:
+       - threadId: The unique thread ID.
+       - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
+    */
+    func listMessages(threadId: String) async throws -> [Message]
+    
+    /**
+     Sends a request to the OpenAI API within a specific thread and create a new attached message
+     https://platform.openai.com/docs/api-reference/messages/createMessage
 
      - Parameters:
        - threadId: The unique thread ID.
        - prompt: The prompt text to send.
        - images: An array of image data (base64 encoded) to include.
-       - completion: A closure that handles the API response or error.
+       - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func createMessage(threadId: String, prompt: String, images: [Data], completion: @escaping @Sendable (Result<[String: Any], Error>) -> Void)
+    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> Message
     
 
 }

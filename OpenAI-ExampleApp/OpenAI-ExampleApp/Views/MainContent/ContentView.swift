@@ -9,7 +9,7 @@ import SwiftUI
 import OpenAI
 
 struct ContentView: View {
-    @StateObject private var viewModel = OpenAIViewModel()
+    @StateObject private var viewModel = ContentViewModel()
     
     var body: some View {
         NavigationView {

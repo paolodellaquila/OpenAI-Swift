@@ -5,8 +5,10 @@
 //  Created by Francesco Paolo Dellaquila on 14/12/24.
 //
 
+import Foundation
+import OpenAI
 
-class OpenAIViewModel: ObservableObject {
+class ContentViewModel: ObservableObject {
     @Published var threadId: String?
     @Published var prompt: String = ""
     @Published var responses: [String] = []

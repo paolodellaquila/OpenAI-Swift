@@ -7,40 +7,34 @@
 
 import Foundation
 
-
-/// Asynchronously fetches a decodable data type from OpenAI's API.
-///
-/// - Parameters:
-///   - debugEnabled: If true the service will print events on DEBUG builds.
-///   - type: The `Decodable` type that the response should be decoded to.
-///   - request: The `URLRequest` describing the API request.
-/// - Throws: An error if the request fails or if decoding fails.
-/// - Returns: A value of the specified decodable type.
-
-class NetworkService {
+class NetworkServiceImpl: NetworkService {
     
-    let session: URLSession
-    let decoder: JSONDecoder = JSONDecoder()
+    let session: URLSessionProtocol
+    let decoder: JSONDecoder
     
-    init(session: URLSession) {
+    init(session: URLSessionProtocol, decoder: JSONDecoder = JSONDecoder()) {
         self.session = session
+        self.decoder = decoder
     }
     
     public func fetch<T: Decodable>(
         debugEnabled: Bool,
         type: T.Type,
-        with request: URLRequest)
-    async throws -> T
-    {
+        with request: URLRequest) async throws -> T {
+            
         let (data, response) = try await session.data(for: request)
+            
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.requestFailed(description: "invalid response unable to get a valid HTTPURLResponse")
         }
+            
         if debugEnabled {
-            printHTTPURLResponse(httpResponse)
+            NetworkMisc.printHTTPURLResponse(httpResponse)
         }
+            
         guard httpResponse.statusCode == 200 else {
             var errorMessage = "status code \(httpResponse.statusCode)"
+            
             do {
                 let error = try decoder.decode(OpenAIErrorResponse.self, from: data)
                 errorMessage += " \(error.error.message ?? "NO ERROR MESSAGE PROVIDED")"
@@ -48,9 +42,10 @@ class NetworkService {
                 // If decoding fails, proceed with a general error message
                 errorMessage = "status code \(httpResponse.statusCode)"
             }
-            throw APIError.responseUnsuccessful(description: errorMessage,
-                                                statusCode: httpResponse.statusCode)
+            
+            throw APIError.responseUnsuccessful(description: errorMessage, statusCode: httpResponse.statusCode)
         }
+            
 #if DEBUG
         if debugEnabled {
             print("DEBUG JSON FETCH API = \(try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any])")
@@ -68,6 +63,7 @@ class NetworkService {
             }
 #endif
             throw APIError.dataCouldNotBeReadMissingData(description: debugMessage)
+            
         } catch {
 #if DEBUG
             if debugEnabled {
