@@ -20,7 +20,7 @@ public protocol OpenAIService {
      https://platform.openai.com/docs/api-reference/threads/createThread
      - Returns: A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
     */
-    func openThread() async throws -> Thread
+    func openThread() async throws -> AIThread
     
     /**
      Delete a thread.

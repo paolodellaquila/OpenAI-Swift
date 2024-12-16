@@ -10,7 +10,7 @@ import OpenAI
 
 @MainActor
 class ContentViewModel: ObservableObject {
-    @Published var thread: Thread?
+    @Published var thread: AIThread?
     @Published var prompt: String = ""
     
     @Published var responses: [String] = []
@@ -24,7 +24,7 @@ class ContentViewModel: ObservableObject {
             guard let self = self else { return }
             
             do {
-                let newThread = try await openAI.openThread()
+                let newThread = try await openAI.service.openThread()
                 self.thread = newThread
             } catch {
                 self.errorMessage = error.localizedDescription
@@ -44,7 +44,7 @@ class ContentViewModel: ObservableObject {
             guard let self = self else { return }
             
             do{
-                _ = try await self.openAI.createMessage(threadId: thread.id, prompt: self.prompt, images: [])
+                _ = try await self.openAI.service.createMessage(threadId: thread.id, prompt: self.prompt, images: [])
                 //TODO
             } catch {
                 self.errorMessage = error.localizedDescription

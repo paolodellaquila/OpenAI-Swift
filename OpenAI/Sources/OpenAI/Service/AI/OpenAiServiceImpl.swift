@@ -38,10 +38,10 @@ class OpenAIServiceImpl: OpenAIService {
     }
 
     //MARK: -- Threads [BETA]
-    public func openThread() async throws -> Thread {
+    public func openThread() async throws -> AIThread {
         let request = try OpenAIAPI.thread(.create).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
         let response = try await self.networkService.fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
-        return Thread.fromThreadResponse(response)
+        return AIThread.fromThreadResponse(response)
     }
     public func deleteThread(threadId: String) async throws -> Bool {
         let request = try OpenAIAPI.thread(.delete(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .delete, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
