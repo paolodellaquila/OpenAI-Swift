@@ -13,31 +13,52 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                Text("OpenAI Swift Package Demo")
-                    .font(.title)
-                    .bold()
-                
+            // Sidebar for thread management
+            List {
                 Button("Open New Thread") {
                     viewModel.openThread()
                 }
                 .buttonStyle(.borderedProminent)
                 
-                if let threadId = viewModel.thread?.id {
-                    Text("Current Thread ID: \(threadId)")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                if let thread = viewModel.thread {
+                    Section(header: Text("Current Thread")) {
+                        Text("ID: \(thread.id)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+            .frame(minWidth: 200)
+            .listStyle(SidebarListStyle())
+            .navigationTitle("Threads")
+            
+            // Center area for chat UI
+            VStack {
+                if let thread = viewModel.thread {
+                    Text("Thread: \(thread.id)")
+                        .font(.headline)
                         .padding()
                 }
                 
-                TextField("Enter Prompt", text: $viewModel.prompt)
-                    .textFieldStyle(.roundedBorder)
-                    .padding()
+                HStack {
+                    TextField("Enter Prompt", text: $viewModel.prompt)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: .infinity)
+                    
+                    Button("Attach Image") {
+                        viewModel.attachImage()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding()
                 
-                Button("Send Request") {
+                Button("Send Message") {
                     viewModel.createMessage()
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)
+                .padding()
+                
+                Divider()
                 
                 ScrollView {
                     VStack(alignment: .leading) {
@@ -50,20 +71,18 @@ struct ContentView: View {
                         }
                     }
                 }
-                
-                Spacer()
             }
-            .padding()
-            .navigationTitle("OpenAI Demo")
+            .frame(minWidth: 400)
+            .navigationTitle("Chat")
             .alert("Error", isPresented: $viewModel.showError, actions: {
                 Button("OK", role: .cancel) {}
             }, message: {
                 Text(viewModel.errorMessage)
             })
         }
+        .frame(minWidth: 600, minHeight: 400)
     }
 }
-
 
 #Preview {
     ContentView()
