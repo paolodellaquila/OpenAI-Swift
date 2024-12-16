@@ -12,7 +12,7 @@ import Foundation
 /// A [run](https://platform.openai.com/docs/api-reference/runs) object, represents an execution run on a [thread](https://platform.openai.com/docs/api-reference/threads).
 /// Related guide: [Assistants](https://platform.openai.com/docs/assistants/overview)
 /// [Run Object](https://platform.openai.com/docs/api-reference/runs/object)
-public struct RunResponse: Decodable {
+public struct RunResponse: Codable {
    
    /// The identifier, which can be referenced in API endpoints.
    public let id: String

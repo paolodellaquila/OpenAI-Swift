@@ -11,7 +11,7 @@ import Foundation
 /// BETA.
 /// Represents a [message](https://platform.openai.com/docs/api-reference/messages) within a [thread](https://platform.openai.com/docs/api-reference/threads).
 /// [Message Object](https://platform.openai.com/docs/api-reference/messages/object)
-public struct MessageResponse: Decodable {
+public struct MessageResponse: Codable {
    
    /// The identifier, which can be referenced in API endpoints.
    public let id: String
