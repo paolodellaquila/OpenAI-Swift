@@ -13,6 +13,7 @@ class OpenAIServiceImpl: OpenAIService {
     private let organizationID: String?
     
     private let networkService: NetworkService
+    private let cacheService: CacheService
 
     
     /**
@@ -35,23 +36,38 @@ class OpenAIServiceImpl: OpenAIService {
         self.session = session
         self.organizationID = organizationID
         self.networkService = NetworkServiceImpl(session: session)
+        self.cacheService = CacheServiceImpl()
     }
 
     //MARK: -- Threads [BETA]
     public func openThread() async throws -> AIThread {
         let request = try OpenAIAPI.thread(.create).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
         let response = try await self.networkService.fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
-        return AIThread.fromThreadResponse(response)
+        let thread = AIThread.fromThreadResponse(response)
+        try self.cacheService.saveThread(thread)
+        
+        return thread
     }
+    
+    public func fetchThreads() async throws -> [AIThread] {
+        return try self.cacheService.fetchThreads()
+    }
+    
     public func deleteThread(threadId: String) async throws -> Bool {
         let request = try OpenAIAPI.thread(.delete(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .delete, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
         let response = try await self.networkService.fetch(debugEnabled: true, type: DeletionStatus.self, with: request)
-        return response.deleted
+        let result = response.deleted
+        
+        if result {
+                try self.cacheService.deleteThread(threadId)
+        }
+        
+        return result
     }
     
 
     //MARK: -- Messages [BETA]
-    func listMessages(
+    func fetchMessages(
        threadId: String,
        limit: Int? = nil,
        order: String? = nil,
@@ -60,32 +76,47 @@ class OpenAIServiceImpl: OpenAIService {
        runID: String? = nil)
        async throws -> [Message] {
            
-       var queryItems: [URLQueryItem] = []
-       if let limit {
-          queryItems.append(.init(name: "limit", value: "\(limit)"))
+
+       let cachedMessages = try self.cacheService.fetchMessages(for: threadId)
+           
+       do {
+           var queryItems: [URLQueryItem] = []
+           if let limit {
+               queryItems.append(.init(name: "limit", value: "\(limit)"))
+           }
+           if let order {
+               queryItems.append(.init(name: "order", value: order))
+           }
+           if let after {
+               queryItems.append(.init(name: "after", value: after))
+           }
+           if let before {
+               queryItems.append(.init(name: "before", value: before))
+           }
+           if let runID {
+               queryItems.append(.init(name: "run_id", value: runID))
+           }
+           
+           let request = try OpenAIAPI.message(.list(threadID: threadId)).request(apiKey: self.apiKey, organizationID: self.organizationID, method: .get, queryItems: queryItems, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+           let response = try await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
+
+           let messages = Message.fromMessageResponse(response)
+           try self.cacheService.saveMessages(for: threadId, messages: messages)
+           
+       } catch {
+           print("Failed to update messages in background: \(error.localizedDescription)")
        }
-       if let order {
-          queryItems.append(.init(name: "order", value: order))
-       }
-       if let after {
-          queryItems.append(.init(name: "after", value: after))
-       }
-       if let before {
-          queryItems.append(.init(name: "before", value: before))
-       }
-       if let runID {
-          queryItems.append(.init(name: "run_id", value: runID))
-       }
-        
-       let request = try OpenAIAPI.message(.list(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .get, queryItems: queryItems, betaHeaderField: "assistants=v2")
-       let response = try await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
-       return Message.fromMessageResponse(response)
+           
+       return cachedMessages
     }
     
     public func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> Message {
         let request = try OpenAIAPI.message(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
         let response = try await self.networkService.fetch(debugEnabled: true, type: MessageResponse.self, with: request)
-        return Message.fromMessageResponse(response)
+        let message = Message.fromMessageResponse(response)
+        
+        try self.cacheService.saveMessages(for: threadId, messages: [message])
+        return message
     }
     
     
@@ -96,7 +127,7 @@ class OpenAIServiceImpl: OpenAIService {
         return Run.fromRunResponse(response)
     }
     
-    func listRuns(
+    func fetchRuns(
        threadId: String,
        limit: Int? = nil,
        order: String? = nil,
@@ -124,7 +155,7 @@ class OpenAIServiceImpl: OpenAIService {
     }
     
     // MARK: -- Files [BETA]
-    func listFiles() async throws -> [File]
+    func fetchFiles() async throws -> [File]
     {
        let request = try OpenAIAPI.file(.list).request(apiKey: apiKey, organizationID: organizationID, method: .get)
        let response = try await self.networkService.fetch(debugEnabled: true, type: [FileResponse].self, with: request)

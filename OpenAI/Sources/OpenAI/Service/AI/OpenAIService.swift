@@ -12,15 +12,20 @@ import Foundation
  Manages individual threads for OpenAI requests.
  */
 public protocol OpenAIService {
-    
 
-    //MARK: THREADS [BETA
+    //MARK: THREADS [BETA]
     /**
      Create a new thread.
      https://platform.openai.com/docs/api-reference/threads/createThread
      - Returns: A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
     */
     func openThread() async throws -> AIThread
+    
+    /**
+     List previous cached opened thread.
+     - Returns: A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
+    */
+    func fetchThreads() async throws -> [AIThread]
     
     /**
      Delete a thread.
@@ -43,7 +48,7 @@ public protocol OpenAIService {
        - threadId: The unique thread ID.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func listMessages(threadId: String, limit: Int?, order: String?, after: String?, before: String?, runID: String?) async throws -> [Message]
+    func fetchMessages(threadId: String, limit: Int?, order: String?, after: String?, before: String?, runID: String?) async throws -> [Message]
     
     /**
      Sends a request to the OpenAI API within a specific thread and create a new attached message
@@ -80,7 +85,7 @@ public protocol OpenAIService {
        - before: timestamp
        - Returns: A Run Object -> https://platform.openai.com/docs/api-reference/runs/object
     */
-    func listRuns(threadId: String, limit: Int?, order: String?, after: String?, before: String?) async throws -> [Run]
+    func fetchRuns(threadId: String, limit: Int?, order: String?, after: String?, before: String?) async throws -> [Run]
     
     // MARK: -- Files [BETA]
     /**
@@ -90,7 +95,7 @@ public protocol OpenAIService {
      - Parameters:
        - Returns: A File Object -> https://platform.openai.com/docs/api-reference/files/object
     */
-    func listFiles() async throws -> [File]
+    func fetchFiles() async throws -> [File]
     
     /**
      Sends a request to the OpenAI API to return a list of Run

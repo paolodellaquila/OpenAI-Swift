@@ -5,7 +5,7 @@
 //  Created by Francesco Paolo Dellaquila on 15/12/24.
 //
 
-public struct AIThread {
+public struct AIThread: Codable {
     public let id, object: String
     public let createdAt: Int
     

@@ -11,81 +11,82 @@ import AppKit
 
 @MainActor
 class ContentViewModel: ObservableObject {
-    @Published var thread: AIThread?
-    @Published var prompt: String = ""
+    @Published var threads: [AIThread] = [] // List of threads
+    @Published var selectedThread: AIThread? // Selected thread
+    @Published var messages: [Message] = [] // Messages of the selected thread
+    @Published var prompt: String = "" // Current user prompt
     
-    @Published var responses: [String] = []
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
+    @Published var isLoadingThreads: Bool = false // Loading state for threads
+    @Published var isLoadingMessages: Bool = false // Loading state for messages
     
     private let openAI = OpenAI()
     
-}
-
-
-//-- Thread
-///manage threads
-extension ContentViewModel {
-    func openThread() {
-        Task { [weak self] in
-            guard let self = self else { return }
-            
+    // Load cached threads
+    func loadThreads() {
+        Task {
             do {
-                let newThread = try await openAI.service.openThread()
-                self.thread = newThread
+                isLoadingThreads = true
+                threads = try await openAI.service.fetchThreads()
             } catch {
-                self.errorMessage = error.localizedDescription
-                self.showError = true
+                errorMessage = "Failed to load threads: \(error.localizedDescription)"
+                showError = true
             }
+            isLoadingThreads = false
         }
     }
-}
-
-//-- Message
-///manaage messages
-extension ContentViewModel {
+    
+    // Add a new thread
+    func openThread() {
+        Task {
+            do {
+                isLoadingThreads = true
+                let newThread = try await openAI.service.openThread()
+                threads.append(newThread)
+            } catch {
+                errorMessage = "Failed to create thread: \(error.localizedDescription)"
+                showError = true
+            }
+            
+            isLoadingThreads = false
+        }
+    }
+    
+    // Select a thread and load its messages
+    func selectThread(_ thread: AIThread) {
+        Task {
+            do {
+                selectedThread = thread
+                isLoadingMessages = true
+                messages = try await openAI.service.fetchMessages(threadId: thread.id, limit: nil, order: nil, after: nil, before: nil, runID: nil)
+            } catch {
+                errorMessage = "Failed to load messages: \(error.localizedDescription)"
+                showError = true
+            }
+            isLoadingMessages = false
+        }
+    }
+    
+    // Send a message
     func createMessage() {
-        guard let thread = thread, !prompt.isEmpty else {
+        guard let thread = selectedThread, !prompt.isEmpty else {
             errorMessage = "Thread or prompt is missing"
             showError = true
             return
         }
         
-        Task { [weak self] in
-            guard let self = self else { return }
-            
-            do{
-                _ = try await self.openAI.service.createMessage(threadId: thread.id, prompt: self.prompt, images: [])
-                //TODO
-            } catch {
-                self.errorMessage = error.localizedDescription
-                self.showError = true
-                return
-            }
-        }
-        
-    }
-}
-
-//-- Image
-///manage images
-extension ContentViewModel {
-    func attachImage() {
-        // macOS-specific image picker
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.image]
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        if panel.runModal() == .OK, let url = panel.url {
+        Task {
             do {
-                let imageData = try Data(contentsOf: url)
-                
+                isLoadingMessages = true
+                let newMessage = try await openAI.service.createMessage(threadId: thread.id, prompt: prompt, images: [])
+                messages.append(newMessage)
+                prompt = "" // Clear prompt after sending
             } catch {
-                self.errorMessage = "Failed to load image: \(error.localizedDescription)"
-                self.showError = true
+                errorMessage = "Failed to send message: \(error.localizedDescription)"
+                showError = true
             }
+            isLoadingMessages = false
         }
     }
 }
-
-

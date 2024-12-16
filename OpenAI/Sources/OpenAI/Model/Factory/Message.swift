@@ -6,7 +6,7 @@
 //
 
 
-public struct Message {
+public struct Message: Codable {
    public let id, object: String
    public let createdAt: Int
    public let assistantID: String?
@@ -25,7 +25,7 @@ public struct Message {
     }
 }
 
-public struct MessageContent {
+public struct MessageContent: Codable {
     public let imageFile: ImageFile?
     public let text: Text?
     
@@ -41,11 +41,11 @@ public struct MessageContent {
     }
 }
 
-public struct ImageFile {
+public struct ImageFile: Codable {
    public let type: String
    public let imageFile: ImageFileContent
    
-   public struct ImageFileContent {
+   public struct ImageFileContent: Codable {
       public let fileID: String
    }
     
@@ -55,11 +55,11 @@ public struct ImageFile {
 
 }
 
-public struct Text {
+public struct Text: Codable {
    public let type: String
    public let text: TextContent
    
-   public struct TextContent {
+    public struct TextContent: Codable {
       public let value: String
    }
     
@@ -68,7 +68,7 @@ public struct Text {
     }
 }
 
-public struct Attachment {
+public struct Attachment: Codable {
     public let fileID: String
     
     static func fromAttachamentResponse(_ response: [MessageAttachmentResponse]) -> [Attachment] {
