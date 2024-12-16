@@ -22,8 +22,13 @@ class ContentViewModel: ObservableObject {
     @Published var isLoadingMessages: Bool = false // Loading state for messages
     
     private let openAI = OpenAI()
+
+}
+
+
+//-- Thread
+extension ContentViewModel {
     
-    // Load cached threads
     func loadThreads() {
         Task {
             do {
@@ -37,7 +42,6 @@ class ContentViewModel: ObservableObject {
         }
     }
     
-    // Add a new thread
     func openThread() {
         Task {
             do {
@@ -52,21 +56,13 @@ class ContentViewModel: ObservableObject {
             isLoadingThreads = false
         }
     }
-    
-    // Select a thread and load its messages
-    func selectThread(_ thread: AIThread) {
-        Task {
-            do {
-                selectedThread = thread
-                isLoadingMessages = true
-                messages = try await openAI.service.fetchMessages(threadId: thread.id, limit: nil, order: nil, after: nil, before: nil, runID: nil)
-            } catch {
-                errorMessage = "Failed to load messages: \(error.localizedDescription)"
-                showError = true
-            }
-            isLoadingMessages = false
-        }
-    }
+
+
+}
+
+
+//-- Message
+extension ContentViewModel {
     
     // Send a message
     func createMessage() {
@@ -89,4 +85,44 @@ class ContentViewModel: ObservableObject {
             isLoadingMessages = false
         }
     }
+    
+    func loadMessages(_ thread: AIThread) {
+        Task {
+            do {
+                selectedThread = thread
+                isLoadingMessages = true
+                messages = try await openAI.service.fetchMessages(threadId: thread.id)
+            } catch {
+                errorMessage = "Failed to load messages: \(error.localizedDescription)"
+                showError = true
+            }
+            isLoadingMessages = false
+        }
+    }
+}
+
+// -- Image
+extension ContentViewModel {
+    
+    func attachImage() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        if panel.runModal() == .OK, let url = panel.url {
+            
+            Task {
+                do {
+                    let imageData = try Data(contentsOf: url)
+                    isLoadingMessages = true
+                    try await openAI.service.uploadFile(params: FileParameters(fileName: panel.representedFilename, file: imageData, purpose: ""))
+                    isLoadingMessages = false
+                } catch {
+                    self.errorMessage = "Failed to load image: \(error.localizedDescription)"
+                    self.showError = true
+                }
+            }
+        }
+    }
+
 }

@@ -48,7 +48,7 @@ public protocol OpenAIService {
        - threadId: The unique thread ID.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func fetchMessages(threadId: String, limit: Int?, order: String?, after: String?, before: String?, runID: String?) async throws -> [Message]
+    func fetchMessages(threadId: String) async throws -> [Message]
     
     /**
      Sends a request to the OpenAI API within a specific thread and create a new attached message

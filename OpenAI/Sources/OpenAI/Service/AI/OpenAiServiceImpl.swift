@@ -67,33 +67,27 @@ class OpenAIServiceImpl: OpenAIService {
     
 
     //MARK: -- Messages [BETA]
-    func fetchMessages(
-       threadId: String,
-       limit: Int? = nil,
-       order: String? = nil,
-       after: String? = nil,
-       before: String? = nil,
-       runID: String? = nil)
-       async throws -> [Message] {
+    func fetchMessages(threadId: String) async throws -> [Message] {
+        
+       let config = FetchMessagesConfig()
            
-
        let cachedMessages = try self.cacheService.fetchMessages(for: threadId)
            
        do {
            var queryItems: [URLQueryItem] = []
-           if let limit {
+           if let limit = config.limit {
                queryItems.append(.init(name: "limit", value: "\(limit)"))
            }
-           if let order {
+           if let order = config.order {
                queryItems.append(.init(name: "order", value: order))
            }
-           if let after {
+           if let after = config.after {
                queryItems.append(.init(name: "after", value: after))
            }
-           if let before {
+           if let before = config.before {
                queryItems.append(.init(name: "before", value: before))
            }
-           if let runID {
+           if let runID = config.runID {
                queryItems.append(.init(name: "run_id", value: runID))
            }
            

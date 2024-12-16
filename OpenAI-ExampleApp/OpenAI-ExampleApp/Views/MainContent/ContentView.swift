@@ -20,7 +20,7 @@ struct ContentView: View {
                 } else {
                     List(viewModel.threads, id: \.id) { thread in
                         Button(action: {
-                            viewModel.selectThread(thread)
+                            viewModel.loadMessages(thread)
                         }) {
                             Text(thread.id)
                                 .font(.body)
@@ -70,6 +70,16 @@ struct ContentView: View {
                         TextField("Enter Prompt", text: $viewModel.prompt)
                             .textFieldStyle(.roundedBorder)
                             .frame(maxWidth: .infinity)
+                        
+                        Button(action: {
+                            viewModel.attachImage()
+                        }) {
+                            Image(systemName: "paperclip")
+                                .font(.system(size: 20))
+                                .foregroundColor(.blue)
+                        }
+                        .buttonStyle(.borderless) // Prevents button from looking like a bordered button
+                        .padding(.horizontal, 5)
                         
                         Button("Send") {
                             viewModel.createMessage()
