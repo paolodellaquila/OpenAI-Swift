@@ -15,6 +15,7 @@ class ContentViewModel: ObservableObject {
     @Published var selectedThread: AIThread? // Selected thread
     @Published var messages: [Message] = [] // Messages of the selected thread
     @Published var prompt: String = "" // Current user prompt
+    @Published var selectedImage: NSImage? = nil // Selected image preview
     
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
@@ -114,8 +115,12 @@ extension ContentViewModel {
             Task {
                 do {
                     let imageData = try Data(contentsOf: url)
+                    if let image = NSImage(data: imageData) {
+                        selectedImage = image
+                    }
+                    
                     isLoadingMessages = true
-                    try await openAI.service.uploadFile(params: FileParameters(fileName: panel.representedFilename, file: imageData, purpose: ""))
+                    try await openAI.service.uploadFile(params: FileParameters(fileName: panel.representedFilename, file: imageData, purpose: "assistants"))
                     isLoadingMessages = false
                 } catch {
                     self.errorMessage = "Failed to load image: \(error.localizedDescription)"
@@ -123,6 +128,10 @@ extension ContentViewModel {
                 }
             }
         }
+    }
+    
+    func removeImage() {
+        selectedImage = nil
     }
 
 }

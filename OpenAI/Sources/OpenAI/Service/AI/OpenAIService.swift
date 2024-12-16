@@ -87,7 +87,7 @@ public protocol OpenAIService {
     */
     func fetchRuns(threadId: String, limit: Int?, order: String?, after: String?, before: String?) async throws -> [Run]
     
-    // MARK: -- Files [BETA]
+    //MARK: -- File [BETA]
     /**
      Sends a request to the OpenAI API to return a list of Run
      https://platform.openai.com/docs/api-reference/files
@@ -97,6 +97,7 @@ public protocol OpenAIService {
     */
     func fetchFiles() async throws -> [File]
     
+    // MARK: -- Upload [BETA]
     /**
      Sends a request to the OpenAI API to return a list of Run
      https://platform.openai.com/docs/api-reference/uploads

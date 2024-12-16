@@ -66,6 +66,35 @@ struct ContentView: View {
                         }
                     }
                     
+                    // Attached Image Preview Bar
+                    if let image = viewModel.selectedImage {
+                        HStack {
+                            Image(nsImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            
+                            Text("Image Selected")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                viewModel.removeImage()
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 20))
+                            }
+                        }
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                    }
+                    
                     HStack {
                         TextField("Enter Prompt", text: $viewModel.prompt)
                             .textFieldStyle(.roundedBorder)

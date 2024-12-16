@@ -45,6 +45,7 @@ enum OpenAIAPI {
     
     enum FileCategory {
        case list
+       case create(request: FileRequest)
        case upload
        case delete(fileID: String)
        case retrieve(fileID: String)
@@ -85,6 +86,7 @@ extension OpenAIAPI: Endpoint {
          }
       case .file(let category):
          switch category {
+             case .create(let request): return "/\(version)/files"
              case .list, .upload: return "/\(version)/files"
              case .delete(let fileID), .retrieve(let fileID): return "/\(version)/files/\(fileID)"
              case .retrieveFileContent(let fileID): return "/\(version)/files/\(fileID)/content"

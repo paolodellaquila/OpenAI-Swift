@@ -73,33 +73,31 @@ class OpenAIServiceImpl: OpenAIService {
            
        let cachedMessages = try self.cacheService.fetchMessages(for: threadId)
            
-       do {
-           var queryItems: [URLQueryItem] = []
-           if let limit = config.limit {
-               queryItems.append(.init(name: "limit", value: "\(limit)"))
-           }
-           if let order = config.order {
-               queryItems.append(.init(name: "order", value: order))
-           }
-           if let after = config.after {
-               queryItems.append(.init(name: "after", value: after))
-           }
-           if let before = config.before {
-               queryItems.append(.init(name: "before", value: before))
-           }
-           if let runID = config.runID {
-               queryItems.append(.init(name: "run_id", value: runID))
-           }
-           
-           let request = try OpenAIAPI.message(.list(threadID: threadId)).request(apiKey: self.apiKey, organizationID: self.organizationID, method: .get, queryItems: queryItems, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
-           let response = try await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
+       var queryItems: [URLQueryItem] = []
+       if let limit = config.limit {
+           queryItems.append(.init(name: "limit", value: "\(limit)"))
+       }
+       if let order = config.order {
+           queryItems.append(.init(name: "order", value: order))
+       }
+       if let after = config.after {
+           queryItems.append(.init(name: "after", value: after))
+       }
+       if let before = config.before {
+           queryItems.append(.init(name: "before", value: before))
+       }
+       if let runID = config.runID {
+           queryItems.append(.init(name: "run_id", value: runID))
+       }
+       
+       let request = try OpenAIAPI.message(.list(threadID: threadId)).request(apiKey: self.apiKey, organizationID: self.organizationID, method: .get, queryItems: queryItems, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+       let response = try? await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
 
+       if let response {
            let messages = Message.fromMessageResponse(response)
            try self.cacheService.saveMessages(for: threadId, messages: messages)
-           
-       } catch {
-           print("Failed to update messages in background: \(error.localizedDescription)")
        }
+       
            
        return cachedMessages
     }
@@ -148,7 +146,7 @@ class OpenAIServiceImpl: OpenAIService {
         return Run.fromRunResponse(response)
     }
     
-    // MARK: -- Files [BETA]
+    //MARK: -- File [BETA]
     func fetchFiles() async throws -> [File]
     {
        let request = try OpenAIAPI.file(.list).request(apiKey: apiKey, organizationID: organizationID, method: .get)
@@ -156,6 +154,7 @@ class OpenAIServiceImpl: OpenAIService {
        return File.fromFileResponse(response)
     }
     
+    // MARK: -- Upload [BETA]
     func uploadFile(params: FileParameters) async throws -> File
     {
        let request = try OpenAIAPI.file(.upload).multiPartRequest(apiKey: apiKey, organizationID: organizationID, method: .post, params: params)

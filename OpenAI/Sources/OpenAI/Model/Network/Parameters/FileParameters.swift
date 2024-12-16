@@ -19,14 +19,18 @@ public struct FileParameters: Encodable {
    /// Use "fine-tune" for [fine-tuning](https://platform.openai.com/docs/api-reference/fine-tuning). This allows us to validate the format of the uploaded file is correct for fine-tuning.
    public let purpose: String
    
+   public let mimeType: String
+   
    public init(
       fileName: String?,
       file: Data,
-      purpose: String)
-   {
+      purpose: String,
+      mimeType: String = "vision"
+   ) {
       self.fileName = fileName
       self.file = file
       self.purpose = purpose
+     self.mimeType = mimeType
    }
 }
 
