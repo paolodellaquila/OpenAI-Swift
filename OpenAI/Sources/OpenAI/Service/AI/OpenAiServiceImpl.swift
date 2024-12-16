@@ -30,7 +30,7 @@ class OpenAIServiceImpl: OpenAIService {
         organizationID: String? = nil
     ) {
         self.apiKey = .bearer(apiKey)
-        APIConstants.overrideBaseURL = baseURL
+        OpenAIAPI.overrideBaseURL = baseURL
         self.session = session
         self.organizationID = organizationID
         self.networkService = NetworkServiceImpl(session: session)
@@ -38,12 +38,12 @@ class OpenAIServiceImpl: OpenAIService {
 
     //MARK: -- Threads
     public func openThread() async throws -> AIThread {
-        let request = try APIConstants.thread.request(apiKey: apiKey, organizationID: nil, method: .post)
+        let request = try OpenAIAPI.thread(.create).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: "assistants=v2")
         let response = try await self.networkService.fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
         return AIThread.fromThreadResponse(response)
     }
     public func deleteThread(threadId: String) async throws -> Bool {
-        let request = try APIConstants.thread.request(apiKey: apiKey, organizationID: nil, method: .delete, queryItems: [URLQueryItem(name: "thread_id", value: threadId)])
+        let request = try OpenAIAPI.thread(.delete(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .delete, betaHeaderField: "assistants=v2")
         let response = try await self.networkService.fetch(debugEnabled: true, type: ThreadResponse.self, with: request)
         return response.deleted ?? false
     }
@@ -51,12 +51,12 @@ class OpenAIServiceImpl: OpenAIService {
 
     //MARK: -- Messages
     public func listMessages(threadId: String) async throws -> [AIMessage] {
-        let request = try APIConstants.message(threadId: threadId).request(apiKey: apiKey, organizationID: nil, method: .get)
+        let request = try OpenAIAPI.message(.list(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .get, betaHeaderField: "assistants=v2")
         let response = try await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
         return AIMessage.fromMessageResponse(response)
     }
     public func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage {
-        let request = try APIConstants.message(threadId: threadId).request(apiKey: apiKey, organizationID: nil, method: .post)
+        let request = try OpenAIAPI.message(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: "assistants=v2")
         let response = try await self.networkService.fetch(debugEnabled: true, type: MessageResponse.self, with: request)
         return AIMessage.fromMessageResponse(response)
     }

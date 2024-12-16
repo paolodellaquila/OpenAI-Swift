@@ -12,7 +12,6 @@ import Foundation
  */
 public class OpenAI {
     private let aiService: OpenAIService
-    private let apiKey: String
 
     /**
      Initializes the OpenAI client. It retrieves the API key from environment variables.
@@ -23,8 +22,7 @@ public class OpenAI {
         guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
             fatalError("API Key not found. Please set 'OPENAI_API_KEY' in your environment variables.")
         }
-        self.apiKey = apiKey
-        self.aiService = OpenAIServiceImpl(apiKey: apiKey)
+        self.aiService = OpenAIServiceImpl(apiKey: apiKey, organizationID: ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION_ID"])
     }
 
     //MARK: -- Threads

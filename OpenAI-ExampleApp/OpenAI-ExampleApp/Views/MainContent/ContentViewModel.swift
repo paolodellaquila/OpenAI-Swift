@@ -8,6 +8,7 @@
 import Foundation
 import OpenAI
 
+@MainActor
 class ContentViewModel: ObservableObject {
     @Published var thread: AIThread?
     @Published var prompt: String = ""
@@ -19,8 +20,16 @@ class ContentViewModel: ObservableObject {
     private let openAI = OpenAI()
     
     func openThread() {
-        Task.detached { [weak self] in
-            self?.thread = try? await self?.openAI.openThread()
+        Task { [weak self] in
+            guard let self = self else { return }
+            
+            do {
+                let newThread = try await openAI.openThread()
+                self.thread = newThread
+            } catch {
+                self.errorMessage = error.localizedDescription
+                self.showError = true
+            }
         }
     }
     
@@ -31,13 +40,15 @@ class ContentViewModel: ObservableObject {
             return
         }
         
-        Task.detached { [weak self] in
+        Task { [weak self] in
+            guard let self = self else { return }
+            
             do{
-                _ = try await self?.openAI.createMessage(threadId: thread.id, prompt: self?.prompt ?? "", images: [])
+                _ = try await self.openAI.createMessage(threadId: thread.id, prompt: self.prompt, images: [])
                 //TODO
             } catch {
-                self?.errorMessage = error.localizedDescription
-                self?.showError = true
+                self.errorMessage = error.localizedDescription
+                self.showError = true
                 return
             }
         }
