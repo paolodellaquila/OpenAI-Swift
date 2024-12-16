@@ -66,4 +66,24 @@ extension Endpoint {
       return request
    }
     
+    func multiPartRequest(
+       apiKey: Authorization,
+       organizationID: String?,
+       method: HTTPMethod,
+       params: MultipartFormDataParameters,
+       queryItems: [URLQueryItem] = [])
+       throws -> URLRequest
+    {
+       var request = URLRequest(url: urlComponents(queryItems: queryItems).url!)
+       request.httpMethod = method.rawValue
+       let boundary = UUID().uuidString
+       request.addValue(apiKey.value, forHTTPHeaderField: apiKey.headerField)
+       if let organizationID {
+          request.addValue(organizationID, forHTTPHeaderField: "OpenAI-Organization")
+       }
+       request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+       request.httpBody = params.encode(boundary: boundary)
+       return request
+    }
+    
 }

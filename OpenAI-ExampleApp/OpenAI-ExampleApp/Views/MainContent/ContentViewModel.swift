@@ -10,7 +10,7 @@ import OpenAI
 
 @MainActor
 class ContentViewModel: ObservableObject {
-    @Published var thread: AIThread?
+    @Published var thread: Thread?
     @Published var prompt: String = ""
     
     @Published var responses: [String] = []

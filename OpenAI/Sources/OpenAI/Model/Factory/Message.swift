@@ -6,46 +6,72 @@
 //
 
 
-public struct AIMessage {
+public struct Message {
    public let id, object: String
    public let createdAt: Int
    public let assistantID: String?
    public let threadID: String
    public let runID: String?
    public let role: String
-   public let content: [AIContent]
-   public let attachments: [AIAttachment]
+   public let content: [MessageContent]
+   public let attachments: [Attachment]
     
-    static func fromMessageResponse(_ response: MessageResponse) -> AIMessage {
-        AIMessage.init(id: response.id, object: response.object, createdAt: response.createdAt, assistantID: response.assistantID, threadID: response.threadID, runID: response.runID, role: response.role, content: AIContent.fromContentResponse(response.content), attachments: AIAttachment.fromAttachamentResponse(response.attachments))
+    static func fromMessageResponse(_ response: MessageResponse) -> Message {
+        Message.init(id: response.id, object: response.object, createdAt: response.createdAt, assistantID: response.assistantID, threadID: response.threadID, runID: response.runID, role: response.role, content: MessageContent.fromContentResponse(response.content), attachments: Attachment.fromAttachamentResponse(response.attachments ?? []))
     }
     
-    static func fromMessageResponse(_ response: [MessageResponse]) -> [AIMessage] {
-        response.map(AIMessage.fromMessageResponse)
-    }
-}
-
-public struct AIContent {
-    public let type: String
-    public let text: AIText
-    
-    static func fromContentResponse(_ response: [ContentResponse]) -> [AIContent] {
-        response.map { AIContent(type: $0.type, text: AIText(value: $0.text.value)) }
+    static func fromMessageResponse(_ response: [MessageResponse]) -> [Message] {
+        response.map(Message.fromMessageResponse)
     }
 }
 
-public struct AIText {
-    public let value: String
+public struct MessageContent {
+    public let imageFile: ImageFile?
+    public let text: Text?
     
-    static func fromTextResponse(_ response: TextResponse) -> AIText {
-        AIText(value: response.value)
+    static func fromContentResponse(_ response: [MessageContentResponse]) -> [MessageContent] {
+        response.map {
+            switch $0 {
+            case .imageFile(let response):
+                MessageContent(imageFile: ImageFile.fromImageFileResponse(response), text: nil)
+            case .text(let response):
+                MessageContent(imageFile: nil, text: Text.fromTextResponse(response))
+            }
+        }
     }
 }
 
-public struct AIAttachment {
+public struct ImageFile {
+   public let type: String
+   public let imageFile: ImageFileContent
+   
+   public struct ImageFileContent {
+      public let fileID: String
+   }
+    
+    static func fromImageFileResponse(_ response: ImageFileResponse) -> ImageFile {
+        ImageFile(type: response.type, imageFile: ImageFileContent(fileID: response.imageFile.fileID))
+    }
+
+}
+
+public struct Text {
+   public let type: String
+   public let text: TextContent
+   
+   public struct TextContent {
+      public let value: String
+   }
+    
+    static func fromTextResponse(_ response: TextResponse) -> Text {
+        Text(type: response.type, text: TextContent(value: response.text.value))
+    }
+}
+
+public struct Attachment {
     public let fileID: String
     
-    static func fromAttachamentResponse(_ response: [AttachmentResponse]) -> [AIAttachment] {
-        response.map { AIAttachment(fileID: $0.fileID) }
+    static func fromAttachamentResponse(_ response: [MessageAttachmentResponse]) -> [Attachment] {
+        response.map { Attachment(fileID: $0.fileID) }
     }
 }

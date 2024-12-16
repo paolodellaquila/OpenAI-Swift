@@ -11,18 +11,16 @@ import Foundation
 /**
  Manages individual threads for OpenAI requests.
  */
-protocol OpenAIService {
+public protocol OpenAIService {
     
 
-    //MARK: THREADS
-    //[BETA]
-    
+    //MARK: THREADS [BETA
     /**
      Create a new thread.
      https://platform.openai.com/docs/api-reference/threads/createThread
      - Returns: A Thread Object -> https://platform.openai.com/docs/api-reference/threads/object
     */
-    func openThread() async throws -> AIThread
+    func openThread() async throws -> Thread
     
     /**
      Delete a thread.
@@ -35,8 +33,7 @@ protocol OpenAIService {
     func deleteThread(threadId: String) async throws -> Bool
     
     
-    //MARK: MESSAGES
-    //[BETA]
+    //MARK: MESSAGES [BETA]
     
     /**
      Sends a request to the OpenAI API within a specific thread and return a list of attached messafe
@@ -46,7 +43,7 @@ protocol OpenAIService {
        - threadId: The unique thread ID.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func listMessages(threadId: String) async throws -> [AIMessage]
+    func listMessages(threadId: String, limit: Int?, order: String?, after: String?, before: String?, runID: String?) async throws -> [Message]
     
     /**
      Sends a request to the OpenAI API within a specific thread and create a new attached message
@@ -58,7 +55,51 @@ protocol OpenAIService {
        - images: An array of image data (base64 encoded) to include.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> AIMessage
+    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> Message
     
+    // MARK: -- Run [BETA]
+    /**
+     Sends a request to the OpenAI API to run a specific thread
+     https://platform.openai.com/docs/api-reference/runs
+
+     - Parameters:
+       - threadId: The unique thread ID.
+       - Returns: A Run Object -> https://platform.openai.com/docs/api-reference/runs/object
+    */
+    func createRun(threadId: String) async throws -> Run
+    
+    /**
+     Sends a request to the OpenAI API to return a list of Run
+     https://platform.openai.com/docs/api-reference/runs
+
+     - Parameters:
+       - threadId: The unique thread ID.
+       - limit: list limit
+       - order: ASC or DESC
+       - after: timestamp
+       - before: timestamp
+       - Returns: A Run Object -> https://platform.openai.com/docs/api-reference/runs/object
+    */
+    func listRuns(threadId: String, limit: Int?, order: String?, after: String?, before: String?) async throws -> [Run]
+    
+    // MARK: -- Files [BETA]
+    /**
+     Sends a request to the OpenAI API to return a list of Run
+     https://platform.openai.com/docs/api-reference/files
+
+     - Parameters:
+       - Returns: A File Object -> https://platform.openai.com/docs/api-reference/files/object
+    */
+    func listFiles() async throws -> [File]
+    
+    /**
+     Sends a request to the OpenAI API to return a list of Run
+     https://platform.openai.com/docs/api-reference/uploads
+
+     - Parameters:
+       - params: FileParameters -> https://platform.openai.com/docs/api-reference/uploads/part-object
+       - Returns: A File Object -> https://platform.openai.com/docs/api-reference/files/object
+    */
+    func uploadFile(params: FileParameters) async throws -> File
 
 }
