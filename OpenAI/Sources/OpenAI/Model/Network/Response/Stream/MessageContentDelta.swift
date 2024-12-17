@@ -5,14 +5,6 @@
 //  Created by Francesco Paolo Dellaquila on 17/12/24.
 //
 
-
-//
-//  MessageContent.swift
-//
-//
-//  Created by James Rochabrun on 3/17/24.
-//
-
 import Foundation
 ///  The [content](https://platform.openai.com/docs/api-reference/messages/object#messages/object-content) of the message in array of text and/or images.
 public enum MessageContentDelta: Codable {

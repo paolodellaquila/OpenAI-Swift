@@ -72,8 +72,8 @@ struct ContentView: View {
                             }
                             
                             // Streamed Response Section
-                            if !viewModel.streamedResponse.isEmpty {
-                                Text(viewModel.streamedResponse)
+                            if let stream = viewModel.streamedResponse[selectedThread.id] {
+                                Text(stream)
                                     .font(.body)
                                     .padding()
                                     .background(Color.blue.opacity(0.1))

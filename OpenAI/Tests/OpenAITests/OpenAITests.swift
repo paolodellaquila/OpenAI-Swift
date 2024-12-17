@@ -1,178 +1,160 @@
+//
+//  OpenAIServiceTests.swift
+//  OpenAI
+//
+//  Created by Francesco Paolo Dellaquila on 14/12/24.
+//
+
+
 import XCTest
 @testable import OpenAI
 
-class OpenAIServiceTests: XCTestCase {
-
-    //MARK: Threads
-    func testCreateThread() async throws {
-        do {
-            let mockThreadResponse = ThreadResponse(
-                id: "mock-thread-id",
-                object: "thread",
-                createdAt: 1700000000,
-                metadata: [:]
-            )
-            
-            // Encode the mock ThreadResponse to JSON
-            let mockData = try? JSONEncoder().encode(mockThreadResponse)
-            
-            // Mock session data
-            let mockSession = URLSessionMock()
-            mockSession.data = mockData
-            
-            let api = OpenAIAPI.thread(.create)
-            
-            let finalURL = URL(string: api.base + api.path)!
-            mockSession.response = HTTPURLResponse(
-                url: finalURL,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )
-            
-            // initialize aiService with mock session and custom response
-            let aiService = OpenAIServiceImpl(apiKey: "test-api-key", session: mockSession)
-            
-            // Open a new thread
-            let thread = try await aiService.openThread()
-            
-            // Validate the thread
-            XCTAssert(thread.id == "mock-thread-id")
-            
-        } catch {
-            XCTFail("Expected success, but got failure")
-        }
+final class OpenAIServiceTests: XCTestCase {
+    var mockService: MockOpenAIService!
+    
+    override func setUp() {
+        super.setUp()
+        mockService = MockOpenAIService()
     }
+    
+    override func tearDown() {
+        mockService = nil
+        super.tearDown()
+    }
+    
+    // MARK: - THREAD TESTS
+    
+    func testOpenThreadSuccess() async throws {
+        let thread = try await mockService.openThread()
+        XCTAssertEqual(thread.id, "mock-thread-id")
+        XCTAssertEqual(thread.object, "thread")
+    }
+    
+    func testFetchThreadsSuccess() async throws {
+        let mockThreads = [
+            AIThread(id: "thread-1", object: "thread", createdAt: 12345),
+            AIThread(id: "thread-2", object: "thread", createdAt: 67890)
+        ]
+        mockService.mockThreads = mockThreads
+        
+        let threads = try await mockService.fetchThreads()
+        XCTAssertEqual(threads.count, 2)
+        XCTAssertEqual(threads[0].id, "thread-1")
+        XCTAssertEqual(threads[1].id, "thread-2")
+    }
+    
     func testDeleteThreadSuccess() async throws {
+        let success = try await mockService.deleteThread(threadId: "mock-thread-id")
+        XCTAssertTrue(success)
+    }
+    
+    func testDeleteThreadFailure() async throws {
+        mockService.shouldThrowError = true
         do {
-            let mockThreadResponse = DeletionStatus(
-                id: "mock-thread-id",
-                object: "",
-                deleted: true
-            )
-            
-            // Encode the mock ThreadResponse to JSON
-            let mockData = try? JSONEncoder().encode(mockThreadResponse)
-            
-            // Mock session data
-            let mockSession = URLSessionMock()
-            mockSession.data = mockData
-            
-            let api = OpenAIAPI.thread(.delete(threadID: "mock-thread-id"))
-            
-            let finalURL = URL(string: api.base + api.path)!
-            mockSession.response = HTTPURLResponse(
-                url: finalURL,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )
-            
-            // initialize aiService with mock session and custom response
-            let aiService = OpenAIServiceImpl(apiKey: "test-api-key", session: mockSession)
-            
-            // Open a new thread
-            let status = try await aiService.deleteThread(threadId: "mock-thread-id")
-            
-            // Validate the thread
-            XCTAssert(status)
-            
+            _ = try await mockService.deleteThread(threadId: "mock-thread-id")
+            XCTFail("Expected error but succeeded")
         } catch {
-            XCTFail("Expected success, but got failure")
+            XCTAssertTrue(error is APIError)
         }
     }
-
-    //MARK: Message
+    
+    // MARK: - MESSAGE TESTS
+    
+    func testFetchMessagesSuccess() async throws {
+        let mockMessages = [
+            Message(
+                id: "msg-1",
+                object: "thread.message",
+                createdAt: 12345,
+                assistantID: nil,
+                threadID: "thread-1",
+                runID: nil,
+                role: "user",
+                content: [],
+                attachments: []
+            ),
+            Message(
+                id: "msg-2",
+                object: "thread.message",
+                createdAt: 67890,
+                assistantID: nil,
+                threadID: "thread-1",
+                runID: nil,
+                role: "user",
+                content: [],
+                attachments: []
+            )
+        ]
+        mockService.mockMessages = mockMessages
+        
+        let messages = try await mockService.fetchMessages(threadId: "thread-1")
+        XCTAssertEqual(messages.count, 2)
+        XCTAssertEqual(messages[0].id, "msg-1")
+        XCTAssertEqual(messages[1].id, "msg-2")
+    }
+    
     func testCreateMessageSuccess() async throws {
+        let message = try await mockService.createMessage(
+            threadId: "thread-1",
+            prompt: "Hello, OpenAI!",
+            image: nil
+        )
+        XCTAssertEqual(message.id, "mock-message-id")
+        XCTAssertEqual(message.threadID, "thread-1")
+        XCTAssertEqual(message.content.first?.text?.text.value, "Hello, OpenAI!")
+    }
+    
+    func testCreateMessageFailure() async throws {
+        mockService.shouldThrowError = true
         do {
-            let mockMessageResponse = MessageResponse(
-                id: "run-id",
-                object: "",
-                createdAt: 00000,
-                threadID: "test-thread-success",
-                status: "id-object",
-                completedAt: 00000,
-                role: "",
-                content: [],
-                assistantID: nil,
-                runID: "",
-                attachments: [],
-                metadata: nil
-            )
-            
-            // Encode the mock ThreadResponse to JSON
-            let mockData = try? JSONEncoder().encode(mockMessageResponse)
-            
-            // Mock session data
-            let mockSession = URLSessionMock()
-            mockSession.data = mockData
-            
-            let api = OpenAIAPI.message(.create(threadID: "id"))
-            
-            let finalURL = URL(string: api.base + api.path)!
-            mockSession.response = HTTPURLResponse(
-                url: finalURL,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )
-            
-            // initialize aiService with mock session and custom response
-            let aiService = OpenAIServiceImpl(apiKey: "test-api-key", session: mockSession)
-            
-            // Send a request
-            let message = try await aiService.createMessage(threadId: "test-thread-success", prompt: "Hello", images: [])
-            
-            // Validate response
-            XCTAssert(message.threadID == "test-thread-success" && message.id == "run-id")
+            _ = try await mockService.createMessage(threadId: "thread-1", prompt: "Fail", image: nil)
+            XCTFail("Expected error but succeeded")
         } catch {
-            XCTFail("Expected success, but got failure")
+            XCTAssertTrue(error is APIError)
         }
     }
-    func testListMessageSuccess() async throws {
+    
+    // MARK: - FILE TESTS
+    
+    func testFetchFilesSuccess() async throws {
+        let mockFiles = [
+            File(id: "file-1", bytes: 1024, createdAt: 12345, filename: "file1.png"),
+            File(id: "file-2", bytes: 2048, createdAt: 67890, filename: "file2.png")
+        ]
+        mockService.mockFiles = mockFiles
+        
+        let files = try await mockService.fetchFiles()
+        XCTAssertEqual(files.count, 2)
+        XCTAssertEqual(files[0].filename, "file1.png")
+        XCTAssertEqual(files[1].filename, "file2.png")
+    }
+    
+    func testFetchFileContentSuccess() async throws {
+        let mockData = Data([0xFF, 0xD8, 0xFF]) // Mock binary data
+        mockService.mockFileContent = mockData
+        
+        let data = try await mockService.fetchFileContent(fileId: "file-1")
+        XCTAssertNotNil(data)
+        XCTAssertEqual(data, mockData)
+    }
+    
+    func testUploadFileSuccess() async throws {
+        let fileParams = FileParameters(fileName: "upload.png", file: Data(), purpose: "assistants")
+        let uploadedFile = try await mockService.uploadFile(params: fileParams)
+        
+        XCTAssertEqual(uploadedFile.id, "mock-file-id")
+        XCTAssertEqual(uploadedFile.filename, "upload.png")
+    }
+    
+    func testUploadFileFailure() async throws {
+        mockService.shouldThrowError = true
         do {
-            let mockMessageResponse = [MessageResponse(
-                id: "run-id",
-                object: "",
-                createdAt: 00000,
-                threadID: "test-thread-success",
-                status: "id-object",
-                completedAt: 00000,
-                role: "",
-                content: [],
-                assistantID: nil,
-                runID: "",
-                attachments: [],
-                metadata: nil
-            )]
-            
-            // Encode the mock ThreadResponse to JSON
-            let mockData = try? JSONEncoder().encode(mockMessageResponse)
-            
-            // Mock session data
-            let mockSession = URLSessionMock()
-            mockSession.data = mockData
-            
-            let api = OpenAIAPI.message(.create(threadID: "id"))
-            
-            let finalURL = URL(string: api.base + api.path)!
-            mockSession.response = HTTPURLResponse(
-                url: finalURL,
-                statusCode: 200,
-                httpVersion: nil,
-                headerFields: nil
-            )
-            
-            // initialize aiService with mock session and custom response
-            let aiService = OpenAIServiceImpl(apiKey: "test-api-key", session: mockSession)
-            
-            // Send a request
-            let messages = try await aiService.listMessages(threadId: "test-thread-success")
-            
-            // Validate response
-            XCTAssert(!messages.isEmpty)
+            let fileParams = FileParameters(fileName: "upload.png", file: Data(), purpose: "assistants")
+            _ = try await mockService.uploadFile(params: fileParams)
+            XCTFail("Expected error but succeeded")
         } catch {
-            XCTFail("Expected success, but got failure")
+            XCTAssertTrue(error is APIError)
         }
     }
 }
+

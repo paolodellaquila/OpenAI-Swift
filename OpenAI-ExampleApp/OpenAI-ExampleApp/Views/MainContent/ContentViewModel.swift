@@ -17,7 +17,7 @@ class ContentViewModel: ObservableObject {
     @Published var imageCache: [String: NSImage] = [:] // Cache for images
     @Published var prompt: String = "" // Current user prompt
     @Published var selectedImage: Data? = nil // Selected image preview
-    @Published var streamedResponse: String = "" // Partial streamed response preview
+    @Published var streamedResponse: [String: String] = [:] // Partial streamed response preview
     
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
@@ -60,6 +60,11 @@ extension ContentViewModel {
             do {
                 isLoadingThreads = true
                 threads = try await openAI.service.fetchThreads()
+                
+                ///Prepare stream content
+                for thread in threads {
+                    streamedResponse[thread.id] = ""
+                }
             } catch {
                 errorMessage = "Failed to load threads: \(error.localizedDescription)"
                 showError = true
@@ -116,6 +121,7 @@ extension ContentViewModel {
                 messages.append(newMessage)
                 prompt = "" // Clear prompt after sending
                 selectedImage = nil // Clear selected image after sending
+                streamedResponse[thread.id] = nil
             } catch {
                 errorMessage = "Failed to send message: \(error.localizedDescription)"
                 showError = true
@@ -132,6 +138,7 @@ extension ContentViewModel {
                 selectedThread = thread
                 isLoadingMessages = true
                 messages = try await openAI.service.fetchMessages(threadId: thread.id)
+                streamedResponse[thread.id] = nil
             } catch {
                 errorMessage = "Failed to load messages: \(error.localizedDescription)"
                 showError = true
@@ -190,7 +197,7 @@ extension ContentViewModel {
     func run(_ threadId: String) async {
         
         isThreadRunning = true
-        streamedResponse = "" // Reset previous response
+        streamedResponse[threadId] = "" // Reset previous response
         
         do {
             let stream = try await openAI.service.createRun(threadId: threadId)
@@ -201,7 +208,7 @@ extension ContentViewModel {
                     if let content = messageDelta.delta.content.first {
                         switch content {
                         case .text(let textDelta):
-                            streamedResponse += textDelta.text.value
+                            streamedResponse[threadId]! += textDelta.text.value
                         case .imageFile(_):
                             break
                         }

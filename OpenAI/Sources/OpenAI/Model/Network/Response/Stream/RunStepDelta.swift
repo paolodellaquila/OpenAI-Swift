@@ -5,14 +5,6 @@
 //  Created by Francesco Paolo Dellaquila on 17/12/24.
 //
 
-
-//
-//  RunStepDeltaObject.swift
-//
-//
-//  Created by James Rochabrun on 3/17/24.
-//
-
 import Foundation
 
 /// Represents a [run step delta](https://platform.openai.com/docs/api-reference/assistants-streaming/run-step-delta-object) i.e. any changed fields on a run step during streaming.

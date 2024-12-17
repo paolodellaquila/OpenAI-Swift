@@ -1,4 +1,4 @@
-# **OpenAI Swift SDK ExampleApp**
+# **OpenAI Swift SDK**
 
 ![ENV Screenshot](/usage_preview.png)
 
