@@ -69,6 +69,7 @@ struct ContentView: View {
                                         AsyncImageView(fileId: fileId, viewModel: viewModel)
                                             .frame(height: 200)
                                             .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .padding(.horizontal)
                                     }
                                     
                                     if content.text != nil {
