@@ -11,7 +11,7 @@ class NetworkServiceImpl: NetworkService, @unchecked Sendable {
     let session: URLSessionProtocol
     let decoder: JSONDecoder
     
-    init(session: URLSessionProtocol, decoder: JSONDecoder = JSONDecoder()) {
+    init(session: URLSession, decoder: JSONDecoder = JSONDecoder()) {
         self.session = session
         self.decoder = decoder
     }
@@ -124,7 +124,10 @@ class NetworkServiceImpl: NetworkService, @unchecked Sendable {
        async throws -> AsyncThrowingStream<T, Error>
     {
 
-       let (data, response) = try await session.bytes(for: request)
+       let (data, response) = try await session.bytes(
+        for: request,
+        delegate: session.delegate as? URLSessionTaskDelegate
+       )
        guard let httpResponse = response as? HTTPURLResponse else {
           throw APIError.requestFailed(description: "invalid response unable to get a valid HTTPURLResponse")
        }
@@ -222,7 +225,10 @@ class NetworkServiceImpl: NetworkService, @unchecked Sendable {
        async throws -> AsyncThrowingStream<AssistantStreamEvent, Error>
     {
 
-       let (data, response) = try await session.bytes(for: request)
+       let (data, response) = try await session.bytes(
+        for: request,
+        delegate: session.delegate as? URLSessionTaskDelegate
+       )
        guard let httpResponse = response as? HTTPURLResponse else {
           throw APIError.requestFailed(description: "invalid response unable to get a valid HTTPURLResponse")
        }

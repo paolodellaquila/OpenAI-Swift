@@ -10,7 +10,7 @@ import Foundation
 class OpenAIServiceImpl: OpenAIService {
     private let apiKey: Authorization
     private let assistantID: String
-    private let session: URLSessionProtocol
+    private let session: URLSession
     private let organizationID: String?
 
     private let networkService: NetworkService
@@ -27,7 +27,7 @@ class OpenAIServiceImpl: OpenAIService {
     init(
         apiKey: String,
         assistantID: String,
-        session: URLSessionProtocol = URLSession.shared,
+        session: URLSession = URLSession.shared,
         baseURL: String? = nil,
         version: String? = nil,
         organizationID: String? = nil
