@@ -1,6 +1,6 @@
 # **OpenAI Swift SDK**
 
-![ENV Screenshot](/usage_preview.png)
+![usage_preview](https://github.com/user-attachments/assets/d09890fa-e371-43cf-90a7-4d338b30d680)
 
 ## **Overview**
 
@@ -39,7 +39,9 @@ This README covers:
     - Scroll to the bottom automatically when new messages are added.
 
 - **Modular Design**
-    - Decoupled `NetworkService` for clean API interactions.
+    - Decoupled `OpenAIService`, `CacheService` and `NetworkService` for clean API interactions.
+    - `Async/Await` pattern.
+    - `Swift 6` support.
     - Extendable `ViewModel` for state management.
 
 ---
@@ -86,10 +88,12 @@ To compile and execute correctly, the following **environment keys** are require
 | Variable               | Value                          |
 |------------------------|--------------------------------|
 | `OPENAI_API_KEY`       | Your actual API key            |
-| `OPENAI_ORGANIZATION_ID` | Your organization ID           |
+| `OPENAI_ORGANIZATION_ID` | Your organization ID         |
 | `OPENAI_ASSISTANT_ID`  | Assistant ID from OpenAI       |
 
-![ENV Screenshot](/env_example.jpg)
+
+![env_example](https://github.com/user-attachments/assets/a1da3dae-2749-4e22-832e-5a8415880fb8)
+
 
 
 #### **Method 2: Environment File (.env)**
@@ -108,7 +112,8 @@ OPENAI_ASSISTANT_ID=asst-XXXXXXXXXXXXXXXXXX
 ## **4. API Usage**
 The project uses `NetworkService` and `ContentViewModel` to handle OpenAI APIs.
 
-![ENV Screenshot](./demo_preview.png)
+![demo_preview](https://github.com/user-attachments/assets/f54c0f41-7d51-4bd2-9d2a-7c3244e8a1f9)
+
 
 ### **Endpoints and Usage**
 
@@ -116,37 +121,39 @@ The project uses `NetworkService` and `ContentViewModel` to handle OpenAI APIs.
 
 - **Create a Thread**
    ```swift
-   viewModel.openThread()
+   openAI.service..openThread()
    ```
 
 - **Delete a Thread**
    ```swift
-   viewModel.deleteThread(thread)
+   openAI.service..deleteThread(thread)
    ```
 
 2. **Message Handling**
 
 - **Create a Message**
    ```swift
-   viewModel.createMessage()
+   openAI.service..createMessage()
    ```
 
 - **Streamed Response**  
   Real-time response streaming with scrolling:
 
    ```swift
-   viewModel.run(threadId)
+   openAI.service..run(threadId)
    ```
 
 3. **Image Uploads**
 
 - Upload and preview images:
    ```swift
-   viewModel.attachImage()
+   openAI.service..attachImage()
    ```
 
-- Display fetched images dynamically using `NSImage`.
-
+- Fetched images content `Data`.
+   ```swift
+   openAI.service.fetchFileContent(fileId: fileId)
+   ```
 ---
 
 ## **5. Example Workflows**
