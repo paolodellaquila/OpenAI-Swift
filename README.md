@@ -1,6 +1,6 @@
-# **OpenAI Swift SDK ExampleApp**
+# **OpenAI Swift SDK**
 
-![ENV Screenshot](/usage_preview.png)
+![usage_preview](https://github.com/user-attachments/assets/d09890fa-e371-43cf-90a7-4d338b30d680)
 
 ## **Overview**
 
@@ -86,10 +86,12 @@ To compile and execute correctly, the following **environment keys** are require
 | Variable               | Value                          |
 |------------------------|--------------------------------|
 | `OPENAI_API_KEY`       | Your actual API key            |
-| `OPENAI_ORGANIZATION_ID` | Your organization ID           |
+| `OPENAI_ORGANIZATION_ID` | Your organization ID         |
 | `OPENAI_ASSISTANT_ID`  | Assistant ID from OpenAI       |
 
-![ENV Screenshot](/env_example.jpg)
+
+![env_example](https://github.com/user-attachments/assets/a1da3dae-2749-4e22-832e-5a8415880fb8)
+
 
 
 #### **Method 2: Environment File (.env)**
@@ -108,7 +110,8 @@ OPENAI_ASSISTANT_ID=asst-XXXXXXXXXXXXXXXXXX
 ## **4. API Usage**
 The project uses `NetworkService` and `ContentViewModel` to handle OpenAI APIs.
 
-![ENV Screenshot](./demo_preview.png)
+![demo_preview](https://github.com/user-attachments/assets/f54c0f41-7d51-4bd2-9d2a-7c3244e8a1f9)
+
 
 ### **Endpoints and Usage**
 
