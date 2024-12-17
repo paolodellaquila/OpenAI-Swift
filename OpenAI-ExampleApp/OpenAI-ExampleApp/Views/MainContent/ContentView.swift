@@ -82,16 +82,16 @@ struct ContentView: View {
                                     .id("streamedResponse")
                             }
                         }
-                        .onChange(of: viewModel.streamedResponse) { _ in
-                            withAnimation {
-                                proxy.scrollTo("streamedResponse", anchor: .bottom)
-                            }
-                        }
-                        .onChange(of: viewModel.messages) { _ in
+                        .onAppear() {
                             if let lastMessage = viewModel.messages.last {
                                 withAnimation {
                                     proxy.scrollTo(lastMessage.id, anchor: .bottom)
                                 }
+                            }
+                        }
+                        .onChange(of: viewModel.streamedResponse) {
+                            withAnimation {
+                                proxy.scrollTo("streamedResponse", anchor: .bottom)
                             }
                         }
                     }
