@@ -63,21 +63,33 @@ struct ContentView: View {
                     ScrollView {
                         VStack(alignment: .leading) {
                             ForEach(viewModel.messages, id: \.id) { message in
-                                
-                                if let fileId = message.content.first?.imageFile?.imageFile.fileID {
-                                    AsyncImageView(fileId: fileId, viewModel: viewModel)
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                }
-                                
-                                if message.content.first?.text != nil {
-                                    Text(message.content.first?.text?.text.value ?? "")
-                                        .padding()
-                                        .background(Color.gray.opacity(0.2))
-                                        .cornerRadius(8)
-                                        .padding(.horizontal)
+                                ForEach(message.content, id: \.id) { content in
+                                    
+                                    if let fileId = content.imageFile?.imageFile.fileID {
+                                        AsyncImageView(fileId: fileId, viewModel: viewModel)
+                                            .frame(height: 200)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    }
+                                    
+                                    if content.text != nil {
+                                        Text(content.text!.text.value)
+                                            .padding()
+                                            .background(Color.gray.opacity(0.2))
+                                            .cornerRadius(8)
+                                            .padding(.horizontal)
+                                    }
                                 }
                             }
+                        }
+                        
+                        // Streamed Response Section
+                        if !viewModel.streamedResponse.isEmpty {
+                            Text(viewModel.streamedResponse)
+                                .font(.body)
+                                .padding()
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(8)
+                                .padding()
                         }
                     }
                     

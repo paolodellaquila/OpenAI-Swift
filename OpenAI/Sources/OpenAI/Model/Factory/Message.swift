@@ -5,6 +5,7 @@
 //  Created by Francesco Paolo Dellaquila on 15/12/24.
 //
 
+import Foundation
 
 public struct Message: Codable {
    public let id, object: String
@@ -26,16 +27,17 @@ public struct Message: Codable {
 }
 
 public struct MessageContent: Codable {
+    public let id: String = UUID().uuidString
     public let imageFile: ImageFile?
     public let text: Text?
     
     static func fromContentResponse(_ response: [MessageContentResponse]) -> [MessageContent] {
         response.map {
-            switch $0 {
-            case .imageFile(let response):
-                MessageContent(imageFile: ImageFile.fromImageFileResponse(response), text: nil)
-            case .text(let response):
-                MessageContent(imageFile: nil, text: Text.fromTextResponse(response))
+            switch $0.type {
+            case .imageFile:
+                MessageContent(imageFile: ImageFile.fromImageFileResponse($0.imageFile!), text: nil)
+            case .text:
+                MessageContent(imageFile: nil, text: Text.fromTextResponse($0.text!))
             }
         }
     }
@@ -49,8 +51,8 @@ public struct ImageFile: Codable {
       public let fileID: String
    }
     
-    static func fromImageFileResponse(_ response: ImageFileResponse) -> ImageFile {
-        ImageFile(type: response.type, imageFile: ImageFileContent(fileID: response.imageFile.fileID))
+    static func fromImageFileResponse(_ response: ImageFileContentResponse) -> ImageFile {
+        ImageFile(type: "image_file", imageFile: ImageFileContent(fileID: response.fileID))
     }
 
 }
@@ -63,8 +65,8 @@ public struct Text: Codable {
       public let value: String
    }
     
-    static func fromTextResponse(_ response: TextResponse) -> Text {
-        Text(type: response.type, text: TextContent(value: response.text.value))
+    static func fromTextResponse(_ response: TextContentResponse) -> Text {
+        Text(type: "text", text: TextContent(value: response.value))
     }
 }
 

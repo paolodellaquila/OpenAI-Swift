@@ -17,6 +17,7 @@ class ContentViewModel: ObservableObject {
     @Published var imageCache: [String: NSImage] = [:] // Cache for images
     @Published var prompt: String = "" // Current user prompt
     @Published var selectedImage: Data? = nil // Selected image preview
+    @Published var streamedResponse: String = "" // Partial streamed response preview
     
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
@@ -45,7 +46,7 @@ class ContentViewModel: ObservableObject {
             print("Failed to load image for file ID \(fileId): \(error.localizedDescription)")
         }
         
-        return nil // Return nil if failed
+        return nil
     }
 
 }
@@ -114,12 +115,13 @@ extension ContentViewModel {
                 let newMessage = try await openAI.service.createMessage(threadId: thread.id, prompt: prompt, image: selectedImage)
                 messages.append(newMessage)
                 prompt = "" // Clear prompt after sending
-                await run(thread.id)
             } catch {
                 errorMessage = "Failed to send message: \(error.localizedDescription)"
                 showError = true
             }
+            
             isLoadingMessages = false
+            await run(thread.id)
         }
     }
     
@@ -186,14 +188,30 @@ extension ContentViewModel {
     
     func run(_ threadId: String) async {
         
+        isThreadRunning = true
+        streamedResponse = "" // Reset previous response
+        
         do {
-            isThreadRunning = true
-            let run = try await openAI.service.createRun(threadId: threadId)
+            let stream = try await openAI.service.createRun(threadId: threadId)
+            
+            for try await result in stream {
+                switch result {
+                case .threadMessageDelta(let messageDelta):
+                    if let content = messageDelta.delta.content.first {
+                        if content.text != nil {
+                            streamedResponse += content.text?.text.value ?? ""
+                        }
+                    }
+                default:
+                    break
+                }
+            }
         } catch {
-            errorMessage = "Failed to retrieve images: \(error.localizedDescription)"
+            errorMessage = "Failed to stream content: \(error.localizedDescription)"
             showError = true
         }
         
-        isLoadingMessages = false
+        isThreadRunning = false
     }
 }
+

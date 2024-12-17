@@ -71,7 +71,7 @@ public protocol OpenAIService {
        - threadId: The unique thread ID.
        - Returns: A Run Object -> https://platform.openai.com/docs/api-reference/runs/object
     */
-    func createRun(threadId: String) async throws -> Run
+    func createRun(threadId: String) async throws -> AsyncThrowingStream<AssistantStreamEvent, Error>
     
     /**
      Sends a request to the OpenAI API to return a list of Run

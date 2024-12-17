@@ -8,8 +8,10 @@
 // MARK: - RunRequest
 struct RunRequest: Codable {
     let assistantId: String
+    let stream: Bool = true
     
     enum CodingKeys: String, CodingKey {
         case assistantId = "assistant_id"
+        case stream
     }
 }

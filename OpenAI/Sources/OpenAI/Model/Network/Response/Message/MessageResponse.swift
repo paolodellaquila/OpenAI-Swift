@@ -21,10 +21,6 @@ public struct MessageResponse: Codable {
    public let createdAt: Int
    /// The [thread](https://platform.openai.com/docs/api-reference/threads) ID that this message belongs to.
    public let threadID: String
-   /// The status of the message, which can be either in_progress, incomplete, or completed.
-   public let status: String?
-   /// The Unix timestamp (in seconds) for when the message was completed.
-   public let completedAt: Int?
    /// The entity that produced the message. One of user or assistant.
    public let role: String
    /// The content of the message in array of text and/or images.
@@ -44,18 +40,16 @@ public struct MessageResponse: Codable {
    }
    
    enum CodingKeys: String, CodingKey {
-      case id
-      case object
-      case createdAt = "created_at"
-      case threadID = "thread_id"
-      case status
-      case completedAt = "completed_at"
-      case role
-      case content
-      case assistantID = "assistant_id"
-      case runID = "run_id"
-      case attachments
-      case metadata
+       case id
+       case object
+       case createdAt = "created_at"
+       case assistantID = "assistant_id"
+       case threadID = "thread_id"
+       case runID = "run_id"
+       case role
+       case content
+       case attachments
+       case metadata
    }
    
    public init(
@@ -63,8 +57,6 @@ public struct MessageResponse: Codable {
       object: String,
       createdAt: Int,
       threadID: String,
-      status: String?,
-      completedAt: Int?,
       role: String,
       content: [MessageContentResponse],
       assistantID: String?,
@@ -76,8 +68,6 @@ public struct MessageResponse: Codable {
       self.object = object
       self.createdAt = createdAt
       self.threadID = threadID
-      self.status = status
-      self.completedAt = completedAt
       self.role = role
       self.content = content
       self.assistantID = assistantID

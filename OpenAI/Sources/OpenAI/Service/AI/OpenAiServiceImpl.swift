@@ -74,8 +74,6 @@ class OpenAIServiceImpl: OpenAIService {
         
        let config = FetchMessagesConfig()
            
-       let cachedMessages = try self.cacheService.fetchMessages(for: threadId)
-           
        var queryItems: [URLQueryItem] = []
        if let limit = config.limit {
            queryItems.append(.init(name: "limit", value: "\(limit)"))
@@ -94,15 +92,15 @@ class OpenAIServiceImpl: OpenAIService {
        }
        
        let request = try OpenAIAPI.message(.list(threadID: threadId)).request(apiKey: self.apiKey, organizationID: self.organizationID, method: .get, queryItems: queryItems, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
-       let response = try? await self.networkService.fetch(debugEnabled: true, type: [MessageResponse].self, with: request)
+       let response = try? await self.networkService.fetch(debugEnabled: true, type: MessageListResponse.self, with: request)
 
        if let response {
-           let messages = Message.fromMessageResponse(response)
+           let messages = Message.fromMessageResponse(response.data)
            try self.cacheService.saveMessages(for: threadId, messages: messages)
+           return messages
        }
-       
-           
-       return cachedMessages
+        
+        return []
     }
     
     public func createMessage(threadId: String, prompt: String, image: Data?) async throws -> Message {
@@ -142,10 +140,12 @@ class OpenAIServiceImpl: OpenAIService {
     
     
     // MARK: -- Run [BETA]
-    func createRun(threadId: String) async throws -> Run {
-        let request = try OpenAIAPI.run(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, params: RunRequest(assistantId: self.assistantID), betaHeaderField: OpenAIAPI.assistanceBetaHeader)
-        let response = try await self.networkService.fetch(debugEnabled: true, type: RunResponse.self, with: request)
-        return Run.fromRunResponse(response)
+    func createRun(threadId: String) async throws -> AsyncThrowingStream<AssistantStreamEvent, Error> {
+        let request = try OpenAIAPI.run(.create(threadID: threadId))
+            .request(apiKey: apiKey, organizationID: organizationID, method: .post, params: RunRequest(assistantId: self.assistantID), betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+        
+        return try await self.networkService.fetchAssistantStreamEvents(with: request, debugEnabled: true)
+        
     }
     
     func fetchRuns(
@@ -186,7 +186,7 @@ class OpenAIServiceImpl: OpenAIService {
     func fetchFileContent(fileId: String) async throws -> Data?
     {
        let request = try OpenAIAPI.file(.retrieveFileContent(fileID: fileId)).request(apiKey: apiKey, organizationID: organizationID, method: .get)
-       let response = try await self.networkService.fetch(debugEnabled: true, type: Data?.self, with: request)
+       let response = try await self.networkService.fetchContentsOfFile(request: request)
        return response
     }
     
