@@ -1,8 +1,10 @@
 # **OpenAI Swift SDK ExampleApp**
 
+![ENV Screenshot](/usage_preview.png)
+
 ## **Overview**
 
-The **OpenAI Swift SDK ExampleApp** is a fully-featured Swift project designed to integrate OpenAI's Assistants API into third party Swift applications. This project demonstrates advanced API interactions, streaming responses, image uploads, file handling, and message threading using modern SwiftUI, Swift Concurrency (async/await), and dependency injection patterns.
+The **OpenAI Swift SDK** is a fully-featured Swift package designed to integrate OpenAI's Assistants API into third party Swift applications. This project demonstrates advanced API interactions, streaming responses, image uploads, file handling, and message threading using modern SwiftUI, Swift Concurrency (async/await), and dependency injection patterns.
 
 This README covers:
 
@@ -87,7 +89,7 @@ To compile and execute correctly, the following **environment keys** are require
 | `OPENAI_ORGANIZATION_ID` | Your organization ID           |
 | `OPENAI_ASSISTANT_ID`  | Assistant ID from OpenAI       |
 
-![ENV Screenshot](./env_example.jpg)
+![ENV Screenshot](/env_example.jpg)
 
 
 #### **Method 2: Environment File (.env)**
@@ -107,7 +109,6 @@ OPENAI_ASSISTANT_ID=asst-XXXXXXXXXXXXXXXXXX
 The project uses `NetworkService` and `ContentViewModel` to handle OpenAI APIs.
 
 ![ENV Screenshot](./demo_preview.png)
-![ENV Screenshot](./usage_preview.png)
 
 ### **Endpoints and Usage**
 
