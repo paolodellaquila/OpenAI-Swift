@@ -8,7 +8,7 @@
 import Foundation
 
 class NetworkServiceImpl: NetworkService, @unchecked Sendable {
-    let session: URLSessionProtocol
+    let session: URLSession
     let decoder: JSONDecoder
     
     init(session: URLSession, decoder: JSONDecoder = JSONDecoder()) {

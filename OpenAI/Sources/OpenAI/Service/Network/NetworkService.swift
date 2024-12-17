@@ -13,7 +13,7 @@ public protocol NetworkService {
     ///
     /// This session is configured according to the needs of OpenAI's API,
     /// and it's used for tasks like sending and receiving data.
-    var session: URLSessionProtocol { get }
+    var session: URLSession { get }
     
     
     /// `JSONDecoder` instance used for decoding JSON responses.

@@ -115,6 +115,7 @@ extension ContentViewModel {
                 let newMessage = try await openAI.service.createMessage(threadId: thread.id, prompt: prompt, image: selectedImage)
                 messages.append(newMessage)
                 prompt = "" // Clear prompt after sending
+                selectedImage = nil // Clear selected image after sending
             } catch {
                 errorMessage = "Failed to send message: \(error.localizedDescription)"
                 showError = true
@@ -212,6 +213,11 @@ extension ContentViewModel {
         }
         
         isThreadRunning = false
+        
+        if let thread = self.selectedThread {
+            self.loadMessages(thread)
+        }
+
     }
 }
 

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Message: Codable {
+public struct Message: Codable, Equatable {
    public let id, object: String
    public let createdAt: Int
    public let assistantID: String?
@@ -16,6 +16,18 @@ public struct Message: Codable {
    public let role: String
    public let content: [MessageContent]
    public let attachments: [Attachment]
+    
+    public static func == (lhs: Message, rhs: Message) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.object == rhs.object &&
+        lhs.createdAt == rhs.createdAt &&
+        lhs.assistantID == rhs.assistantID &&
+        lhs.threadID == rhs.threadID &&
+        lhs.runID == rhs.runID &&
+        lhs.role == rhs.role &&
+        lhs.content.count == rhs.content.count &&
+        lhs.attachments.count == rhs.attachments.count
+    }
     
     static func fromMessageResponse(_ response: MessageResponse) -> Message {
         Message.init(id: response.id, object: response.object, createdAt: response.createdAt, assistantID: response.assistantID, threadID: response.threadID, runID: response.runID, role: response.role, content: MessageContent.fromContentResponse(response.content), attachments: Attachment.fromAttachamentResponse(response.attachments ?? []))
@@ -30,14 +42,51 @@ public struct MessageContent: Codable {
     public let id: String = UUID().uuidString
     public let imageFile: ImageFile?
     public let text: Text?
+    public let type: ContentType?
+    
+    enum CodingKeys: String, CodingKey {
+        case type
+        case text
+        case imageFile = "image_file"
+    }
+
+    public enum ContentType: String, Codable {
+        case text
+        case imageFile = "image_file"
+    }
+    
+    public init (text: Text?, imageFile: ImageFile?, type: ContentType?) {
+        self.text = text
+        self.imageFile = imageFile
+        self.type = type
+    }
+    
+    // Custom decoder to parse `text` or `image_file` dynamically
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode the content type
+        let type = try container.decode(ContentType.self, forKey: .type)
+        
+        switch type {
+        case .text:
+            self.text = try container.decode(Text.self, forKey: .text)
+            self.imageFile = nil
+            self.type = .text
+        case .imageFile:
+            self.imageFile = try container.decode(ImageFile.self, forKey: .imageFile)
+            self.text = nil
+            self.type = .imageFile
+        }
+    }
     
     static func fromContentResponse(_ response: [MessageContentResponse]) -> [MessageContent] {
         response.map {
             switch $0.type {
             case .imageFile:
-                MessageContent(imageFile: ImageFile.fromImageFileResponse($0.imageFile!), text: nil)
+                MessageContent(text: nil, imageFile: ImageFile.fromImageFileResponse($0.imageFile!), type: .imageFile)
             case .text:
-                MessageContent(imageFile: nil, text: Text.fromTextResponse($0.text!))
+                MessageContent(text: Text.fromTextResponse($0.text!), imageFile: nil, type: .text)
             }
         }
     }

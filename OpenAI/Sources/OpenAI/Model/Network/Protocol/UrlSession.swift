@@ -10,8 +10,7 @@ import Foundation
 /**
  Protocol to abstract URLSession for dependency injection and mocking.
  */
-public protocol URLSessionProtocol {
-    var delegate: URLSessionDelegate? { get }
+/*public protocol URLSessionProtocol {
     
     func data(for request: URLRequest) async throws -> (Data, URLResponse)
     func bytes(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (URLSession.AsyncBytes, URLResponse)
@@ -19,12 +18,13 @@ public protocol URLSessionProtocol {
 
 extension URLSession: URLSessionProtocol {
     
-    public var delegate: URLSessionDelegate? {
-        return self.delegate
+    public func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        return try await self.data(for: request)
     }
-    
+
     public func bytes(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (URLSession.AsyncBytes, URLResponse) {
-        let response = try await self.bytes(for: request, delegate: delegate)
-        return response
+        // Use the specified delegate here
+        let (stream, response) = try await self.bytes(for: request, delegate: delegate)
+        return (stream, response)
     }
-}
+}*/

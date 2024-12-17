@@ -60,37 +60,39 @@ struct ContentView: View {
                         .font(.headline)
                         .padding()
                     
-                    ScrollView {
-                        VStack(alignment: .leading) {
-                            ForEach(viewModel.messages, id: \.id) { message in
-                                ForEach(message.content, id: \.id) { content in
-                                    
-                                    if let fileId = content.imageFile?.imageFile.fileID {
-                                        AsyncImageView(fileId: fileId, viewModel: viewModel)
-                                            .frame(height: 200)
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            .padding(.horizontal)
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            VStack(alignment: .leading) {
+                                ForEach(viewModel.messages, id: \.id) { message in
+                                    ForEach(message.content, id: \.id) { content in
+                                        MessageContentView(content: content)
                                     }
-                                    
-                                    if content.text != nil {
-                                        Text(content.text!.text.value)
-                                            .padding()
-                                            .background(Color.gray.opacity(0.2))
-                                            .cornerRadius(8)
-                                            .padding(.horizontal)
-                                    }
+                                    .id(message.id)
                                 }
                             }
+                            
+                            // Streamed Response Section
+                            if !viewModel.streamedResponse.isEmpty {
+                                Text(viewModel.streamedResponse)
+                                    .font(.body)
+                                    .padding()
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(8)
+                                    .padding()
+                                    .id("streamedResponse")
+                            }
                         }
-                        
-                        // Streamed Response Section
-                        if !viewModel.streamedResponse.isEmpty {
-                            Text(viewModel.streamedResponse)
-                                .font(.body)
-                                .padding()
-                                .background(Color.blue.opacity(0.1))
-                                .cornerRadius(8)
-                                .padding()
+                        .onChange(of: viewModel.streamedResponse) { _ in
+                            withAnimation {
+                                proxy.scrollTo("streamedResponse", anchor: .bottom)
+                            }
+                        }
+                        .onChange(of: viewModel.messages) { _ in
+                            if let lastMessage = viewModel.messages.last {
+                                withAnimation {
+                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                                }
+                            }
                         }
                     }
                     
