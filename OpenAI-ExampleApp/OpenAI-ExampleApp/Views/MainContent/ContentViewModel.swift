@@ -80,7 +80,18 @@ extension ContentViewModel {
             isLoadingThreads = false
         }
     }
-
+    
+    func deleteThread(_ thread: AIThread) {
+        Task {
+            do {
+                try await openAI.service.deleteThread(threadId: thread.id)
+                threads.removeAll { $0.id == thread.id }
+            } catch {
+                errorMessage = "Failed to delete thread: \(error.localizedDescription)"
+                showError = true
+            }
+        }
+    }
 
 }
 

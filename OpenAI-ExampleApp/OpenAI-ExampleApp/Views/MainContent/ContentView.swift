@@ -10,6 +10,8 @@ import OpenAI
 
 struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
+    @State private var threadToDelete: AIThread? // Track the thread to delete
+    @State private var showDeleteConfirmation = false // Control the dialog visibility
     
     var body: some View {
         NavigationView {
@@ -24,6 +26,18 @@ struct ContentView: View {
                         }) {
                             Text(thread.id)
                                 .font(.body)
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                // Show confirmation dialog for thread deletion
+                                threadToDelete = thread
+                                showDeleteConfirmation = true
+                            }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                            }
+                            .buttonStyle(.borderless)
                         }
                     }
                 }
@@ -136,6 +150,20 @@ struct ContentView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage)
+        }
+        .confirmationDialog(
+            "Are you sure you want to delete this thread?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let thread = threadToDelete {
+                    viewModel.deleteThread(thread)
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Deleting this thread will permanently remove it. This action cannot be undone.")
         }
     }
 }
