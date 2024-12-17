@@ -199,8 +199,11 @@ extension ContentViewModel {
                 switch result {
                 case .threadMessageDelta(let messageDelta):
                     if let content = messageDelta.delta.content.first {
-                        if content.text != nil {
-                            streamedResponse += content.text?.text.value ?? ""
+                        switch content {
+                        case .text(let textDelta):
+                            streamedResponse += textDelta.text.value
+                        case .imageFile(_):
+                            break
                         }
                     }
                 default:
@@ -213,11 +216,6 @@ extension ContentViewModel {
         }
         
         isThreadRunning = false
-        
-        if let thread = self.selectedThread {
-            self.loadMessages(thread)
-        }
-
     }
 }
 

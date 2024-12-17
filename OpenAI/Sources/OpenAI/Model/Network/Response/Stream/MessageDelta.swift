@@ -24,7 +24,7 @@ public struct MessageDelta: Delta {
       /// The entity that produced the message. One of user or assistant.
       public let role: String?
       /// The content of the message in array of text and/or images.
-      public let content: [MessageContent]
+      public let content: [MessageContentDelta]
 
       enum Role: String {
          case user

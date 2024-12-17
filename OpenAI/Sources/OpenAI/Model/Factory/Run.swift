@@ -25,8 +25,6 @@ public struct Run: Decodable {
    public let assistantID: String
    /// The status of the run, which can be either queued, in_progress, requires_action, cancelling, cancelled, failed, completed, or expired.
    public let status: String
-   /// Details on the action required to continue the run. Will be null if no action is required.
-   public let requiredAction: RequiredAction?
    /// The Unix timestamp (in seconds) for when the run will expire.
    public let expiresAt: Int?
    /// The Unix timestamp (in seconds) for when the run was started.
@@ -63,16 +61,6 @@ public struct Run: Decodable {
       case expired
    }
    
-   public struct RequiredAction: Decodable {
-      
-      /// For now, this is always submit_tool_outputs.
-      public let type: String
-      
-      private enum CodingKeys: String, CodingKey {
-         case type
-      }
-   }
-   
    public var displayStatus: Status? { .init(rawValue: status) }
    
    private enum CodingKeys: String, CodingKey {
@@ -82,7 +70,6 @@ public struct Run: Decodable {
       case threadID = "thread_id"
       case assistantID = "assistant_id"
       case status
-      case requiredAction = "required_action"
       case expiresAt = "expires_at"
       case startedAt = "started_at"
       case cancelledAt = "cancelled_at"
@@ -106,7 +93,6 @@ public struct Run: Decodable {
             threadID: response.threadID,
             assistantID: response.assistantID,
             status: response.status,
-            requiredAction: RequiredAction(type: "submit_tool_outputs"), ///fixed for now
             expiresAt: response.expiresAt,
             startedAt: response.startedAt,
             cancelledAt: response.cancelledAt,
