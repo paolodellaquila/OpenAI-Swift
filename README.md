@@ -39,7 +39,9 @@ This README covers:
     - Scroll to the bottom automatically when new messages are added.
 
 - **Modular Design**
-    - Decoupled `NetworkService` for clean API interactions.
+    - Decoupled `OpenAIService`, `CacheService` and `NetworkService` for clean API interactions.
+    - `Async/Await` pattern.
+    - `Swift 6` support.
     - Extendable `ViewModel` for state management.
 
 ---
@@ -119,37 +121,39 @@ The project uses `NetworkService` and `ContentViewModel` to handle OpenAI APIs.
 
 - **Create a Thread**
    ```swift
-   viewModel.openThread()
+   openAI.service..openThread()
    ```
 
 - **Delete a Thread**
    ```swift
-   viewModel.deleteThread(thread)
+   openAI.service..deleteThread(thread)
    ```
 
 2. **Message Handling**
 
 - **Create a Message**
    ```swift
-   viewModel.createMessage()
+   openAI.service..createMessage()
    ```
 
 - **Streamed Response**  
   Real-time response streaming with scrolling:
 
    ```swift
-   viewModel.run(threadId)
+   openAI.service..run(threadId)
    ```
 
 3. **Image Uploads**
 
 - Upload and preview images:
    ```swift
-   viewModel.attachImage()
+   openAI.service..attachImage()
    ```
 
-- Display fetched images dynamically using `NSImage`.
-
+- Fetched images content `Data`.
+   ```swift
+   openAI.service.fetchFileContent(fileId: fileId)
+   ```
 ---
 
 ## **5. Example Workflows**
