@@ -8,7 +8,7 @@
 
 public struct FetchMessagesConfig {
     public var limit: Int? = 50
-    public var order: String? = "ASC"
+    public var order: String? = "asc"
     public var after: String? = nil
     public var before: String? = nil
     public var runID: String? = nil

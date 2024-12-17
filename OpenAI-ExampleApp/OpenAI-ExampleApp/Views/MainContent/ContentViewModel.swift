@@ -22,6 +22,7 @@ class ContentViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var isLoadingThreads: Bool = false // Loading state for threads
     @Published var isLoadingMessages: Bool = false // Loading state for messages
+    @Published var isThreadRunning: Bool = false // Loading state for run thread
     
     private let openAI = OpenAI()
     
@@ -113,6 +114,7 @@ extension ContentViewModel {
                 let newMessage = try await openAI.service.createMessage(threadId: thread.id, prompt: prompt, image: selectedImage)
                 messages.append(newMessage)
                 prompt = "" // Clear prompt after sending
+                await run(thread.id)
             } catch {
                 errorMessage = "Failed to send message: \(error.localizedDescription)"
                 showError = true
@@ -177,4 +179,21 @@ extension ContentViewModel {
         selectedImage = nil
     }
 
+}
+
+// -- Run
+extension ContentViewModel {
+    
+    func run(_ threadId: String) async {
+        
+        do {
+            isThreadRunning = true
+            let run = try await openAI.service.createRun(threadId: threadId)
+        } catch {
+            errorMessage = "Failed to retrieve images: \(error.localizedDescription)"
+            showError = true
+        }
+        
+        isLoadingMessages = false
+    }
 }

@@ -19,10 +19,10 @@ public class OpenAI {
      - Throws: A fatal error if the API key is not set in the environment variables.
     */
     public init() {
-        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
-            fatalError("API Key not found. Please set 'OPENAI_API_KEY' in your environment variables.")
+        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], let assistantId = ProcessInfo.processInfo.environment["OPENAI_ASSISTANT_ID"] else {
+            fatalError("API Key or Assistant ID not found. Please set 'OPENAI_API_KEY' and 'OPENAI_ASSISTANT_ID' in your environment variables.")
         }
-        self.service = OpenAIServiceImpl(apiKey: apiKey, organizationID: ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION_ID"])
+        self.service = OpenAIServiceImpl(apiKey: apiKey, assistantID: assistantId, organizationID: ProcessInfo.processInfo.environment["OPENAI_ORGANIZATION_ID"])
     }
 
 

@@ -5,39 +5,40 @@
 //  Created by Francesco Paolo Dellaquila on 15/12/24.
 //
 
+// MARK: - MessageRequest
 struct MessageRequest: Codable {
-    let id, object: String
-    let createdAt: Int
-    let assistantID: String?
-    let threadID: String
-    let runID: String?
     let role: String
-    let content: [ContentRequest]
-    let attachments: [AttachmentRequest]
-
+    let content: [MessageContentRequest]
+    
     enum CodingKeys: String, CodingKey {
-        case id, object
-        case createdAt = "created_at"
-        case assistantID = "assistant_id"
-        case threadID = "thread_id"
-        case runID = "run_id"
-        case role, content, attachments
+        case role, content
     }
 }
 
-// MARK: - Content
-struct ContentRequest: Codable {
+// MARK: - MessageContentRequest
+struct MessageContentRequest: Codable {
     let type: String
-    let text: TextRequest
+    let text: String?
+    let imageFile: ImageFileContentRequest?
+    
+    enum CodingKeys: String, CodingKey {
+        case type
+        case text
+        case imageFile = "image_file"
+    }
+    
+    // Factory methods for cleaner content creation
+    static func textContent(_ value: String) -> MessageContentRequest {
+        return MessageContentRequest(type: "text", text: value, imageFile: nil)
+    }
+    
+    static func imageContent(fileId: String) -> MessageContentRequest {
+        return MessageContentRequest(type: "image_file", text: nil, imageFile: ImageFileContentRequest(fileId: fileId))
+    }
 }
 
-// MARK: - Text
-struct TextRequest: Codable {
-    let value: String
-}
-
-// MARK: - Attachment
-struct AttachmentRequest: Codable {
+// MARK: - ImageFileContentRequest
+struct ImageFileContentRequest: Codable {
     let fileId: String
     
     enum CodingKeys: String, CodingKey {

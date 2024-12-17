@@ -9,9 +9,10 @@ import Foundation
 
 class OpenAIServiceImpl: OpenAIService {
     private let apiKey: Authorization
+    private let assistantID: String
     private let session: URLSessionProtocol
     private let organizationID: String?
-    
+
     private let networkService: NetworkService
     private let cacheService: CacheService
 
@@ -25,6 +26,7 @@ class OpenAIServiceImpl: OpenAIService {
     */
     init(
         apiKey: String,
+        assistantID: String,
         session: URLSessionProtocol = URLSession.shared,
         baseURL: String? = nil,
         version: String? = nil,
@@ -35,6 +37,7 @@ class OpenAIServiceImpl: OpenAIService {
         OpenAIAPI.overrideVersion = version
         self.session = session
         self.organizationID = organizationID
+        self.assistantID = assistantID
         self.networkService = NetworkServiceImpl(session: session)
         self.cacheService = CacheServiceImpl()
     }
@@ -106,21 +109,29 @@ class OpenAIServiceImpl: OpenAIService {
         
         var uploadedFile: File?
         
+        // Step 1: Upload the file if an image is provided
         if let image {
-            uploadedFile = try await uploadFile(params: FileParameters(fileName: UUID().uuidString, file: image, purpose: "assistants"))
+            uploadedFile = try await uploadFile(params: FileParameters(fileName: UUID().uuidString + ".jpg", file: image))
         }
         
-        let request = try OpenAIAPI.message(.create(threadID: threadId, messageRequest: MessageRequest(
-            id: UUID().uuidString,
-            object: "thread.message",
-            createdAt: Int(Date.timeIntervalSinceReferenceDate),
-            assistantID: nil,
-            threadID: threadId,
-            runID: nil,
+        // Step 2: Build the content array
+        var content: [MessageContentRequest] = []
+        
+        if let uploadedFile {
+            content.append(.imageContent(fileId: uploadedFile.id))
+        }
+        
+        // Add the text content
+        content.append(.textContent(prompt))
+        
+        // Step 3: Construct the request body
+        let messageRequest = MessageRequest(
             role: "user",
-            content: [ContentRequest(type: "text", text: TextRequest(value: prompt))],
-            attachments: uploadedFile != nil ? [AttachmentRequest(fileId: uploadedFile!.id)] : []
-        ))).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+            content: content
+        )
+        
+        // Step 4: Build the request
+        let request = try OpenAIAPI.message(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, params: messageRequest, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
         
         let response = try await self.networkService.fetch(debugEnabled: true, type: MessageResponse.self, with: request)
         let message = Message.fromMessageResponse(response)
@@ -132,7 +143,7 @@ class OpenAIServiceImpl: OpenAIService {
     
     // MARK: -- Run [BETA]
     func createRun(threadId: String) async throws -> Run {
-        let request = try OpenAIAPI.run(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+        let request = try OpenAIAPI.run(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, params: RunRequest(assistantId: self.assistantID), betaHeaderField: OpenAIAPI.assistanceBetaHeader)
         let response = try await self.networkService.fetch(debugEnabled: true, type: RunResponse.self, with: request)
         return Run.fromRunResponse(response)
     }
