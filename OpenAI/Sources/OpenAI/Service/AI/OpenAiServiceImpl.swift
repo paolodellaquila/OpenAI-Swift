@@ -102,8 +102,26 @@ class OpenAIServiceImpl: OpenAIService {
        return cachedMessages
     }
     
-    public func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> Message {
-        let request = try OpenAIAPI.message(.create(threadID: threadId)).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+    public func createMessage(threadId: String, prompt: String, image: Data?) async throws -> Message {
+        
+        var uploadedFile: File?
+        
+        if let image {
+            uploadedFile = try await uploadFile(params: FileParameters(fileName: UUID().uuidString, file: image, purpose: "assistants"))
+        }
+        
+        let request = try OpenAIAPI.message(.create(threadID: threadId, messageRequest: MessageRequest(
+            id: UUID().uuidString,
+            object: "thread.message",
+            createdAt: Int(Date.timeIntervalSinceReferenceDate),
+            assistantID: nil,
+            threadID: threadId,
+            runID: nil,
+            role: "user",
+            content: [ContentRequest(type: "text", text: TextRequest(value: prompt))],
+            attachments: uploadedFile != nil ? [AttachmentRequest(fileId: uploadedFile!.id)] : []
+        ))).request(apiKey: apiKey, organizationID: organizationID, method: .post, betaHeaderField: OpenAIAPI.assistanceBetaHeader)
+        
         let response = try await self.networkService.fetch(debugEnabled: true, type: MessageResponse.self, with: request)
         let message = Message.fromMessageResponse(response)
         
@@ -153,6 +171,14 @@ class OpenAIServiceImpl: OpenAIService {
        let response = try await self.networkService.fetch(debugEnabled: true, type: [FileResponse].self, with: request)
        return File.fromFileResponse(response)
     }
+    
+    func fetchFileContent(fileId: String) async throws -> Data?
+    {
+       let request = try OpenAIAPI.file(.retrieveFileContent(fileID: fileId)).request(apiKey: apiKey, organizationID: organizationID, method: .get)
+       let response = try await self.networkService.fetch(debugEnabled: true, type: Data?.self, with: request)
+       return response
+    }
+    
     
     // MARK: -- Upload [BETA]
     func uploadFile(params: FileParameters) async throws -> File

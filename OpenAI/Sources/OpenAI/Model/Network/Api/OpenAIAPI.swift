@@ -26,7 +26,7 @@ enum OpenAIAPI {
     }
     
     enum MessageCategory {
-        case create(threadID: String)
+        case create(threadID: String, messageRequest: MessageRequest)
         case retrieve(threadID: String, messageID: String)
         case modify(threadID: String, messageID: String)
         case delete(threadID: String, messageID: String)
@@ -45,7 +45,6 @@ enum OpenAIAPI {
     
     enum FileCategory {
        case list
-       case create(request: FileRequest)
        case upload
        case delete(fileID: String)
        case retrieve(fileID: String)
@@ -73,7 +72,8 @@ extension OpenAIAPI: Endpoint {
          }
       case .message(let category):
          switch category {
-            case .create(let threadID), .list(let threadID): return "/\(version)/threads/\(threadID)/messages"
+            case .create(let threadID, let request): return "/\(version)/threads/\(threadID)/messages"
+            case .list(let threadID): return "/\(version)/threads/\(threadID)/messages"
             case .retrieve(let threadID, let messageID), .modify(let threadID, let messageID), .delete(let threadID, let messageID): return "/\(version)/threads/\(threadID)/messages/\(messageID)"
          }
       case .run(let category):
@@ -86,7 +86,6 @@ extension OpenAIAPI: Endpoint {
          }
       case .file(let category):
          switch category {
-             case .create(let request): return "/\(version)/files"
              case .list, .upload: return "/\(version)/files"
              case .delete(let fileID), .retrieve(let fileID): return "/\(version)/files/\(fileID)"
              case .retrieveFileContent(let fileID): return "/\(version)/files/\(fileID)/content"

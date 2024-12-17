@@ -60,7 +60,7 @@ public protocol OpenAIService {
        - images: An array of image data (base64 encoded) to include.
        - Returns: A Message Object -> https://platform.openai.com/docs/api-reference/messages/object
     */
-    func createMessage(threadId: String, prompt: String, images: [Data]) async throws -> Message
+    func createMessage(threadId: String, prompt: String, image: Data?) async throws -> Message
     
     // MARK: -- Run [BETA]
     /**
@@ -89,7 +89,7 @@ public protocol OpenAIService {
     
     //MARK: -- File [BETA]
     /**
-     Sends a request to the OpenAI API to return a list of Run
+     Sends a request to the OpenAI API to return a list of File
      https://platform.openai.com/docs/api-reference/files
 
      - Parameters:
@@ -97,9 +97,18 @@ public protocol OpenAIService {
     */
     func fetchFiles() async throws -> [File]
     
+    /**
+     Sends a request to the OpenAI API to return a specific File
+     https://platform.openai.com/docs/api-reference/files
+
+     - Parameters:
+       - Returns: A File Object -> https://platform.openai.com/docs/api-reference/files/object
+    */
+    func fetchFileContent(fileId: String) async throws -> Data?
+    
     // MARK: -- Upload [BETA]
     /**
-     Sends a request to the OpenAI API to return a list of Run
+     Sends a request to the OpenAI API to upload a File
      https://platform.openai.com/docs/api-reference/uploads
 
      - Parameters:

@@ -50,9 +50,10 @@ struct ContentView: View {
                         VStack(alignment: .leading) {
                             ForEach(viewModel.messages, id: \.id) { message in
                                 
-                                //TODO manage photo
-                                if message.content.first?.imageFile != nil {
-                                    
+                                if let fileId = message.content.first?.imageFile?.imageFile.fileID {
+                                    AsyncImageView(fileId: fileId, viewModel: viewModel)
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
                                 
                                 if message.content.first?.text != nil {
@@ -67,13 +68,16 @@ struct ContentView: View {
                     }
                     
                     // Attached Image Preview Bar
-                    if let image = viewModel.selectedImage {
+                    if let imageData = viewModel.selectedImage {
                         HStack {
-                            Image(nsImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 50, height: 50)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            if let image = NSImage(data: imageData) {
+                                Image(nsImage: image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+
                             
                             Text("Image Selected")
                                 .font(.subheadline)

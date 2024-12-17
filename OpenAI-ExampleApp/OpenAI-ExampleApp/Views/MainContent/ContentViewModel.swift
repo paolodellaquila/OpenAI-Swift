@@ -14,8 +14,9 @@ class ContentViewModel: ObservableObject {
     @Published var threads: [AIThread] = [] // List of threads
     @Published var selectedThread: AIThread? // Selected thread
     @Published var messages: [Message] = [] // Messages of the selected thread
+    @Published var imageCache: [String: NSImage] = [:] // Cache for images
     @Published var prompt: String = "" // Current user prompt
-    @Published var selectedImage: NSImage? = nil // Selected image preview
+    @Published var selectedImage: Data? = nil // Selected image preview
     
     @Published var showError: Bool = false
     @Published var errorMessage: String = ""
@@ -23,6 +24,28 @@ class ContentViewModel: ObservableObject {
     @Published var isLoadingMessages: Bool = false // Loading state for messages
     
     private let openAI = OpenAI()
+    
+    
+    // Retrieve an image and cache it
+    func loadImage(for fileId: String) async -> NSImage? {
+        if let cachedImage = imageCache[fileId] {
+            return cachedImage // Return cached image if available
+        }
+        
+        do {
+            let fileData = try await openAI.service.fetchFileContent(fileId: fileId)
+            guard let fileData else { return nil }
+            
+            if let image = NSImage(data: fileData) {
+                imageCache[fileId] = image // Cache the image
+                return image
+            }
+        } catch {
+            print("Failed to load image for file ID \(fileId): \(error.localizedDescription)")
+        }
+        
+        return nil // Return nil if failed
+    }
 
 }
 
@@ -76,7 +99,7 @@ extension ContentViewModel {
         Task {
             do {
                 isLoadingMessages = true
-                let newMessage = try await openAI.service.createMessage(threadId: thread.id, prompt: prompt, images: [])
+                let newMessage = try await openAI.service.createMessage(threadId: thread.id, prompt: prompt, image: selectedImage)
                 messages.append(newMessage)
                 prompt = "" // Clear prompt after sending
             } catch {
@@ -105,6 +128,21 @@ extension ContentViewModel {
 // -- Image
 extension ContentViewModel {
     
+    func retrieveImage(_ fileId: String) async -> Data? {
+        var image: Data?
+        
+        do {
+            isLoadingMessages = true
+            image = try await openAI.service.fetchFileContent(fileId: fileId)
+        } catch {
+            errorMessage = "Failed to retrieve images: \(error.localizedDescription)"
+            showError = true
+        }
+        
+        isLoadingMessages = false
+        return image
+    }
+    
     func attachImage() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.image]
@@ -115,13 +153,7 @@ extension ContentViewModel {
             Task {
                 do {
                     let imageData = try Data(contentsOf: url)
-                    if let image = NSImage(data: imageData) {
-                        selectedImage = image
-                    }
-                    
-                    isLoadingMessages = true
-                    try await openAI.service.uploadFile(params: FileParameters(fileName: panel.representedFilename, file: imageData, purpose: "assistants"))
-                    isLoadingMessages = false
+                    selectedImage = imageData
                 } catch {
                     self.errorMessage = "Failed to load image: \(error.localizedDescription)"
                     self.showError = true
